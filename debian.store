@@ -1,1 +1,1 @@
-{"base": "709bd59d", "parent": "debian/rolling/mola_imu_preintegration", "previous": "ba390265", "trim": "", "trimbase": ""}
+{"base": "6ef72d2a", "parent": "debian/jazzy/mola_imu_preintegration", "previous": "5d2ab20c", "trim": "", "trimbase": ""}
