@@ -20,7 +20,6 @@ find_package(mola_common REQUIRED)
 find_package(mrpt-math) # for MRPT Eigen utilities
 find_package(mrpt-maps)
 find_package(mrpt-poses)
-find_package(mrpt-tclap)
 
 find_mola_package(mola_kernel)
 
@@ -30,13 +29,13 @@ file(GLOB_RECURSE LIB_SRCS src/*.cpp src/*.h)
 file(GLOB_RECURSE LIB_PUBLIC_HDRS include/*.h)
 
 mola_add_library(
-	TARGET ${PROJECT_NAME}
-	SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
-	PUBLIC_LINK_LIBRARIES
-		mola::mola_kernel
-	PRIVATE_LINK_LIBRARIES
-		mrpt::maps
-		mrpt::math
-	CMAKE_DEPENDENCIES
-		mola_kernel
+  TARGET ${PROJECT_NAME}
+  SOURCES ${LIB_SRCS} ${LIB_PUBLIC_HDRS}
+  PUBLIC_LINK_LIBRARIES
+    mola::mola_kernel
+  PRIVATE_LINK_LIBRARIES
+    mrpt::maps
+    mrpt::math
+  CMAKE_DEPENDENCIES
+    mola_kernel
 )
