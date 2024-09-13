@@ -8,7 +8,7 @@ We call these *core MOLA modules* and they are kept as colcon packages
 in the `MOLAorg/mola <https://github.com/MOLAorg/mola>`_ repository.
 
 Actual SLAM solutions, which make use of these core modules,
-are listed in the :ref:`solutions` page.
+are listed in the :ref:`solutions <solutions>` page.
 
 Recall that each module has its own License, please refer to its
 source code or the `<license>` tag of its `package.xml` file.
@@ -29,6 +29,7 @@ source code or the `<license>` tag of its `package.xml` file.
   module_mola_kernel
   module_mola_launcher
   module_mola_metric_maps
+  module_mola_navstate_fg
   module_mola_navstate_fuse
   module_mola_pose_list
   module_mola_relocalization
