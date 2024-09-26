@@ -144,10 +144,11 @@ class Rosbag2Dataset : public RawDataSourceBase,
     /** At initialization
      *
      */
-    std::vector<std::optional<DatasetEntry>> read_ahead_;
-    size_t                                   rosbag_next_idx_       = 0;
-    size_t                                   rosbag_next_idx_write_ = 0;
-    std::set<std::string>                    already_pub_sensor_labels_;
+    mutable std::vector<std::optional<DatasetEntry>> read_ahead_;
+    size_t                                           rosbag_next_idx_       = 0;
+    size_t                                           rosbag_next_idx_write_ = 0;
+    std::set<std::string>                            already_pub_sensor_labels_;
+    mutable std::deque<size_t> unload_queue_;  //!< read_ahead_ indices
 
     // Methods and variables for the ROS->MRPT conversion
     // -------------------------------------------------------
@@ -200,10 +201,13 @@ class Rosbag2Dataset : public RawDataSourceBase,
 
     Obs catchExceptions(const std::function<Obs()>& f);
 
+    void autoUnloadOldEntries() const;
+
     bool findOutSensorPose(
         mrpt::poses::CPose3D& des, const std::string& target_frame,
         const std::string&                         source_frame,
-        const std::optional<mrpt::poses::CPose3D>& fixedSensorPose);
+        const std::optional<mrpt::poses::CPose3D>& fixedSensorPose,
+        const std::string_view                     label);
 
     mutable timestep_t    last_used_tim_index_ = 0;
     bool                  paused_              = false;
