@@ -5,18 +5,19 @@
 -->
 <package format="3">
   <name>mola_pose_list</name>
-  <version>1.0.5</version>
+  <version>1.2.0</version>
   <description>C++ library for searchable pose lists</description>
 
-  <author     email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</author>
   <maintainer email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</maintainer>
+  <license file="LICENSE">GPLv3</license>
 
   <url type="website">https://github.com/MOLAorg/mola/tree/develop/mola_pose_list</url>
 
-  <license file="LICENSE">GPLv3</license>
 
   <depend>mola_common</depend>
-  <depend>mrpt2</depend>
+
+  <depend>mrpt_libmaps</depend>
+  <depend>mrpt_libposes</depend>
 
   <doc_depend>doxygen</doc_depend>
 
