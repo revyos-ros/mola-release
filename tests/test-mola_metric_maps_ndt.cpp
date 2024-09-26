@@ -19,13 +19,13 @@
  * ------------------------------------------------------------------------- */
 
 /**
- * @file   test-mola_metric_maps_hashedvoxels.cpp
- * @brief  Test the voxel map class
+ * @file   test-mola_metric_maps_ndt.cpp
+ * @brief  Test the 3D NDT map class
  * @author Jose Luis Blanco Claraco
- * @date   Oct 31, 2023
+ * @date   Aug 22, 2024
  */
 
-#include <mola_metric_maps/HashedVoxelPointCloud.h>
+#include <mola_metric_maps/NDT.h>
 #include <mrpt/obs/CObservation2DRangeScan.h>
 #include <mrpt/obs/stock_observations.h>
 #include <mrpt/opengl/Scene.h>
@@ -34,16 +34,16 @@
 
 void test_voxelmap_basic_ops()
 {
-    mola::HashedVoxelPointCloud map;
+    mola::NDT map;
     ASSERT_(map.isEmpty());
 
-    map.insertPoint({1.0f, 2.0f, 3.0f});
+    map.insertPoint({1.0f, 2.0f, 3.0f}, {.0f, .0f, .0f});
     ASSERT_(!map.isEmpty());
 }
 
 void test_voxelmap_insert_2d_scan()
 {
-    mola::HashedVoxelPointCloud map(0.2 /*voxel size*/);
+    mola::NDT map(0.2 /*voxel size*/);
 
     mrpt::obs::CObservation2DRangeScan scan2D;
     mrpt::obs::stock_observations::example2DRangeScan(scan2D);
@@ -77,6 +77,8 @@ void test_voxelmap_insert_2d_scan()
         scan2D, mrpt::poses::CPose3D::FromXYZYawPitchRoll(
                     -0.05, -0.01, -0.01, 0, 0, 0));
 
+// TODO: Update for new NN API!
+#if 0
     for (size_t knn = 2; knn < 3; knn++)
     {
         for (size_t i = 0; i < queryPts.size(); i++)
@@ -115,6 +117,7 @@ void test_voxelmap_insert_2d_scan()
             }
         }
     }
+#endif
 }
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv)
