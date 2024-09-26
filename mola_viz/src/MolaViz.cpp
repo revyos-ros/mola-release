@@ -43,7 +43,6 @@
 #include <mrpt/obs/CObservationPointCloud.h>
 #include <mrpt/obs/CObservationRotatingScan.h>
 #include <mrpt/obs/CObservationVelodyneScan.h>
-#include <mrpt/opengl/CGridPlaneXY.h>
 #include <mrpt/opengl/COpenGLScene.h>
 #include <mrpt/opengl/CPointCloudColoured.h>
 #include <mrpt/opengl/stock_objects.h>
@@ -704,8 +703,6 @@ mrpt::gui::CDisplayWindowGUI::Ptr MolaViz::create_and_add_window(
     // Add a background scene:
     auto scene = mrpt::opengl::COpenGLScene::Create();
 
-    scene->insert(mrpt::opengl::CGridPlaneXY::Create());
-
     {
         std::lock_guard<std::mutex> lck(win->background_scene_mtx);
         win->background_scene = std::move(scene);
@@ -1008,6 +1005,43 @@ std::future<bool> MolaViz::update_viewport_look_at(
             ASSERT_(topWin->background_scene);
             topWin->camera().setCameraPointing(lookAt.x, lookAt.y, lookAt.z);
 
+            return true;
+        });
+
+    auto lck = mrpt::lockHelper(guiThreadPendingTasksMtx_);
+    guiThreadPendingTasks_.emplace_back([=]() { (*task)(); });
+    guiThreadMustReLayoutTheseWindows_.insert(parentWindow);
+    return task->get_future();
+}
+
+std::future<bool> MolaViz::update_viewport_camera_azimuth(
+    const double azimuth, bool absolute_falseForRelative,
+    const std::string& viewportName, const std::string& parentWindow)
+{
+    using return_type = bool;
+
+    auto task = std::make_shared<std::packaged_task<return_type()>>(
+        [this, azimuth, absolute_falseForRelative, viewportName, parentWindow]()
+        {
+            MRPT_LOG_DEBUG_STREAM(
+                "update_viewport_camera_azimuth() azimuth="
+                << azimuth
+                << " absolute_falseForRelative:" << absolute_falseForRelative);
+
+            ASSERT_(windows_.count(parentWindow));
+            auto topWin = windows_.at(parentWindow).win;
+            ASSERT_(topWin);
+
+            // No need to acquire the mutex, since this task will be run
+            // in the proper moment in the proper thread:
+            ASSERT_(topWin->background_scene);
+
+            if (absolute_falseForRelative)
+                topWin->camera().setAzimuthDegrees(mrpt::RAD2DEG(azimuth));
+            else
+                topWin->camera().setAzimuthDegrees(
+                    mrpt::RAD2DEG(azimuth) +
+                    topWin->camera().getAzimuthDegrees());
             return true;
         });
 
