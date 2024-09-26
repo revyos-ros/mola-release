@@ -5,18 +5,19 @@
 -->
 <package format="3">
   <name>mola_launcher</name>
-  <version>1.0.5</version>
+  <version>1.2.0</version>
   <description>Launcher app for MOLA systems</description>
 
-  <author     email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</author>
   <maintainer email="joseluisblancoc@gmail.com">Jose-Luis Blanco-Claraco</maintainer>
+  <license file="LICENSE">GPLv3</license>
 
   <url type="website">https://github.com/MOLAorg/mola/tree/develop/mola_launcher</url>
 
-  <license file="LICENSE">GPLv3</license>
 
   <depend>mola_kernel</depend>
-  <depend>mrpt2</depend>
+
+  <depend>mrpt_libbase</depend>
+  <depend>mrpt_libtclap</depend>
 
   <doc_depend>doxygen</doc_depend>
 
