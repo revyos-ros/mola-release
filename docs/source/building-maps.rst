@@ -285,6 +285,9 @@ Afterwards, visualizing :ref:`metric map files <mp2p_icp_basics>` (``*.mm``) can
 
 |
 
+
+.. _tutorial-pub-map-server-to-ros:
+
 5. Publish the map to ROS 2
 ----------------------------------------
 
@@ -354,6 +357,7 @@ and then visualize them with the GUI app :ref:`icp-log-viewer <app_icp-log-viewe
 ----------------------------------------
 Once you have a map, here are some next steps:
 
+- :ref:`This tutorial <tutorial-mola-lo-map-and-localize>` on how to save/load maps and re-localize using MOLA-LO ROS 2 nodes.
 - loop closure (Write me!)
 - :ref:`geo-referencing`.
 - :ref:`Use for localization <localization-only>`.
