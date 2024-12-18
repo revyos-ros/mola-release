@@ -3,6 +3,14 @@ Changelog for package mola_input_rosbag2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+1.4.0 (2024-12-18)
+------------------
+
+1.3.0 (2024-12-11)
+------------------
+* Fix typo in warning message
+* Contributors: Jose Luis Blanco-Claraco
+
 1.2.1 (2024-09-29)
 ------------------
 
