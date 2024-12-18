@@ -2,6 +2,16 @@
 Changelog for package mola_launcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.4.0 (2024-12-18)
+------------------
+* Fix missing --ros-args too
+* Forward --ros-args to BridgeROS2
+* MOLA system yaml files: added "enabled" optional property for modules and rds visualizers
+* Contributors: Jose Luis Blanco-Claraco
+
+1.3.0 (2024-12-11)
+------------------
+
 1.2.1 (2024-09-29)
 ------------------
 
