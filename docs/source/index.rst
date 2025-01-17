@@ -15,7 +15,6 @@ MOLA
   building-maps
   localization
   geo-referencing
-  use-cases
   ros2api
   solutions
 
@@ -32,24 +31,29 @@ MOLA
 .. toctree::
   :maxdepth: 2
   :hidden:
+  :caption: State estimation
+
+  mola_state_estimators
+
+.. toctree::
+  :maxdepth: 2
+  :hidden:
   :caption: mp2p_icp
 
   module-mp2p-icp
-  mp2p_icp_installing
   mp2p_icp_basics
   mp2p_icp_optimal-transformations
   mp2p_icp_applications
-  mp2p_icp_demos
 
 .. toctree::
   :maxdepth: 2
   :hidden:
   :caption: Learn more
 
-  mola_architecture
   tutorials
-  supported-sensors
+  mola_architecture
   dataset-conversions
+  supported-sensors
   modules
   doxygen-index
   bibliography
@@ -58,7 +62,7 @@ MOLA
 :octicon:`mark-github` `MOLA`_ is a Modular system for Localization and Mapping.
 
 Get started:
- - Read: :ref:`building-maps`.
+ - Follow the tutorials: :ref:`Building your first map <building-maps>`, :ref:`Mapping and localization <tutorial-mola-lo-map-and-localize>`.
  - Read :octicon:`rocket` :ref:`mola_lidar_odometry` documentation.
  - See :ref:`use-cases` for examples of use.
  - See :ref:`installing` and :ref:`how to cite it <citing_mola>`.
@@ -88,6 +92,11 @@ Get started:
    :scale: 100%
    :align: middle
    :target: https://index.ros.org/search/?term=mp2p_icp
+
+.. |badgeHrel_SE| image:: https://img.shields.io/ros/v/humble/mola_state_estimation
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola_state_estimation
 
 .. iron badges ------
 
@@ -123,6 +132,10 @@ Get started:
    :align: middle
    :target: https://index.ros.org/search/?term=mp2p_icp
 
+.. |badgeJrel_SE| image:: https://img.shields.io/ros/v/jazzy/mola_state_estimation
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola_state_estimation
 
 .. rolling badges ------
 
@@ -140,6 +153,11 @@ Get started:
    :scale: 100%
    :align: middle
    :target: https://index.ros.org/search/?term=mp2p_icp
+
+.. |badgeRrel_SE| image:: https://img.shields.io/ros/v/rolling/mola_state_estimation
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola_state_estimation
 
 
 .. _installing:
@@ -163,6 +181,7 @@ How to install all MOLA modules:
         # Install core MOLA modules and 3D LiDAR odometry:
         sudo apt install \
          ros-$ROS_DISTRO-mola \
+         ros-$ROS_DISTRO-mola-state-estimation \
          ros-$ROS_DISTRO-mola-lidar-odometry
 
         # (OPTIONAL) Install example small datasets to run demos/unit tests:
@@ -182,17 +201,22 @@ How to install all MOLA modules:
 
     These are the **versions available** from ROS build farms for each main MOLA component:
 
-    +-------------------------+---------------+---------------------+---------------------+
-    | ROS distribution        |      MOLA     | mola_lidar_odometry |   mp2p_icp          |
-    +=========================+===============+=====================+=====================+
-    | ROS 2 Humble (u22.04)   |  |badgeHrel|  |   |badgeHrel_LO|    |   |badgeHrel_MP|    |
-    +-------------------------+---------------+---------------------+---------------------+
-    | ROS 2 Iron (u22.04)     |  |badgeIrel|  |   |badgeIrel_LO|    |   |badgeIrel_MP|    |
-    +-------------------------+---------------+---------------------+---------------------+
-    | ROS 2 Jazzy (u24.04)    |  |badgeJrel|  |   |badgeJrel_LO|    |   |badgeJrel_MP|    |
-    +-------------------------+---------------+---------------------+---------------------+
-    | ROS 2 Rolling (u24.04)  |  |badgeRrel|  |   |badgeRrel_LO|    |   |badgeRrel_MP|    |
-    +-------------------------+---------------+---------------------+---------------------+
+    +----------------------+--------------------+----------------+----------------+
+    | Repository           | ROS 2 Humble       | ROS 2 Jazzy    | ROS 2 Rolling  |
+    |                      |  (u22.04)          |   (u24.04)     |    (u24.04)    |
+    +======================+====================+================+================+
+    | MOLA                 | |badgeHrel|        | |badgeJrel|    | |badgeRrel|    |
+    +----------------------+--------------------+----------------+----------------+
+    | mola_lidar_odometry  | |badgeHrel_LO|     | |badgeJrel_LO| | |badgeRrel_LO| |
+    +----------------------+--------------------+----------------+----------------+
+    | mola_state_estimation| |badgeHrel_SE|     | |badgeJrel_SE| | |badgeRrel_SE| |
+    +----------------------+--------------------+----------------+----------------+
+    | mp2p_icp             | |badgeHrel_MP|     | |badgeJrel_MP| | |badgeRrel_MP| |
+    +----------------------+--------------------+----------------+----------------+
+
+    EOL ROS distribution:
+   
+     - ROS 2 Iron (u22.04): MOLA |badgeIrel|, mola_lidar_odometry |badgeIrel_LO|, mp2p_icp |badgeIrel_MP|
 
 
 .. dropdown:: Build from sources
@@ -219,6 +243,7 @@ How to install all MOLA modules:
         git clone https://github.com/MOLAorg/mola_common.git
         git clone https://github.com/MOLAorg/mp2p_icp.git --recursive
         git clone https://github.com/MOLAorg/mola.git --recursive
+        git clone https://github.com/MOLAorg/mola_state_estimation.git
         git clone https://github.com/MOLAorg/mola_test_datasets.git
 
         # MOLA lidar odometry package:
@@ -279,3 +304,68 @@ The basics of the MOLA framework were introduced in :cite:`blanco2019modular`.
 
 .. _A Modular Optimization Framework for Localization and Mapping: https://ingmec.ual.es/~jlblanco/papers/blanco2019mola_rss2019.pdf
 
+
+.. _use-cases:
+
+Use cases
+=============
+Next follow some examples of applications of MOLA SLAM solutions with :ref:`3D LiDAR Odometry <mola_lidar_odometry>`.
+
+|
+
+Automotive SLAM
+-----------------
+An example of urban SLAM from the KITTI dataset:
+
+.. image:: https://mrpt.github.io/imgs/mola-slam-kitti-demo.gif
+
+See how to :ref:`launch this demo yourself <mola-lo-gui-kitti>`.
+
+|
+
+Forest inventory (3D mapping)
+--------------------------------
+See paper :cite:t:`aguilar2024lidar`.
+
+.. raw:: html
+
+    <div style="margin-top:10px;">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/sbakEOnsL6Y?si=xV8-RGNiEFKR-dAI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+
+|
+
+Backpack 3D mapping indoors
+--------------------------------
+
+.. raw:: html
+
+    <div style="margin-top:10px;">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/XNvf8OMXZoY?si=QqiMlni2lmcojph_" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+
+|
+
+Mapping from a drone
+----------------------
+Using the HILTI 2021 dataset:
+
+.. raw:: html
+
+    <div style="margin-top:10px;">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/1h2aayHvhVU?si=xWMJZ7bDfaWKlOfY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+
+|
+
+Greenhouse mapping
+--------------------------------
+See paper :cite:t:`greenbot2024canadas`.
+
+.. raw:: html
+
+    <div style="margin-top:10px;">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/tdXzYeG51Bc?si=IgjYINt1t7qoLb7R" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+
+|
