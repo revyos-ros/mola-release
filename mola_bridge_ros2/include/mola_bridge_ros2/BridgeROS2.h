@@ -43,6 +43,8 @@
 // MOLA <-> ROS services:
 #include <mola_msgs/srv/map_load.hpp>
 #include <mola_msgs/srv/map_save.hpp>
+#include <mola_msgs/srv/mola_runtime_param_get.hpp>
+#include <mola_msgs/srv/mola_runtime_param_set.hpp>
 #include <mola_msgs/srv/relocalize_from_gnss.hpp>
 #include <mola_msgs/srv/relocalize_near_pose.hpp>
 
@@ -129,10 +131,19 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         /// tf frame name for odometry's frame of reference:
         std::string reference_frame = "map";
 
+        /// Direct mode (false):
+        ///   reference_frame ("map") -> base_link ("base_link")
+        ///
+        ///  Indirect mode (true), following ROS REP 105 https://ros.org/reps/rep-0105.html
+        ///   map -> odom  (such as "map -> odom -> base_link" = "map -> base_link")
+        bool publish_localization_following_rep105 = true;
+
         bool forward_ros_tf_as_mola_odometry_observations = false;
         bool publish_odometry_msgs_from_slam              = true;
 
         bool publish_tf_from_robot_pose_observations = true;
+
+        std::string relocalize_from_topic = "/initialpose";  //!< Default in RViz
 
         /// If true, the original dataset timestamps will be used to publish.
         /// Otherwise, the wallclock time will be used.
@@ -182,6 +193,8 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
 
     std::vector<rclcpp::Subscription<sensor_msgs::msg::NavSatFix>::SharedPtr> subsGNSS_;
 
+    rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr subInitPose_;
+
     void callbackOnPointCloud2(
         const sensor_msgs::msg::PointCloud2& o, const std::string& outSensorLabel,
         const std::optional<mrpt::poses::CPose3D>& fixedSensorPose);
@@ -200,11 +213,13 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
 
     void callbackOnOdometry(const nav_msgs::msg::Odometry& o, const std::string& outSensorLabel);
 
+    void callbackOnRelocalizeTopic(const geometry_msgs::msg::PoseWithCovarianceStamped& o);
+
     bool waitForTransform(
         mrpt::poses::CPose3D& des, const std::string& target_frame, const std::string& source_frame,
         bool printErrors);
 
-    void publishOdometry();
+    void importRosOdometryToMOLA();
 
     /// Returns either the wallclock "now" (params_.use_sim_time = false)
     /// or the equivalent of the passed argument in ROS 2 format otherwise.
@@ -239,10 +254,12 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     std::mutex molaSubsMtx_;
 
     // ROS services:
-    rclcpp::Service<mola_msgs::srv::RelocalizeFromGNSS>::SharedPtr srvRelocGNNS_;
-    rclcpp::Service<mola_msgs::srv::RelocalizeNearPose>::SharedPtr srvRelocPose_;
-    rclcpp::Service<mola_msgs::srv::MapLoad>::SharedPtr            srvMapLoad_;
-    rclcpp::Service<mola_msgs::srv::MapSave>::SharedPtr            srvMapSave_;
+    rclcpp::Service<mola_msgs::srv::RelocalizeFromGNSS>::SharedPtr  srvRelocGNNS_;
+    rclcpp::Service<mola_msgs::srv::RelocalizeNearPose>::SharedPtr  srvRelocPose_;
+    rclcpp::Service<mola_msgs::srv::MapLoad>::SharedPtr             srvMapLoad_;
+    rclcpp::Service<mola_msgs::srv::MapSave>::SharedPtr             srvMapSave_;
+    rclcpp::Service<mola_msgs::srv::MolaRuntimeParamGet>::SharedPtr srvParamGet_;
+    rclcpp::Service<mola_msgs::srv::MolaRuntimeParamSet>::SharedPtr srvParamSet_;
 
     void service_relocalize_from_gnss(
         const std::shared_ptr<mola_msgs::srv::RelocalizeFromGNSS::Request> request,
@@ -259,6 +276,14 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     void service_map_save(
         const std::shared_ptr<mola_msgs::srv::MapSave::Request> request,
         std::shared_ptr<mola_msgs::srv::MapSave::Response>      response);
+
+    void service_param_get(
+        const std::shared_ptr<mola_msgs::srv::MolaRuntimeParamGet::Request> request,
+        std::shared_ptr<mola_msgs::srv::MolaRuntimeParamGet::Response>      response);
+
+    void service_param_set(
+        const std::shared_ptr<mola_msgs::srv::MolaRuntimeParamSet::Request> request,
+        std::shared_ptr<mola_msgs::srv::MolaRuntimeParamSet::Response>      response);
 
     void onNewLocalization(const mola::LocalizationSourceBase::LocalizationUpdate& l);
 
