@@ -44,6 +44,7 @@
 // ROS 2:
 #include <nav_msgs/msg/odometry.hpp>
 #include <rclcpp/node.hpp>
+#include <std_msgs/msg/float32.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using namespace mola;
@@ -77,10 +78,22 @@ void BridgeROS2::ros_node_thread_main(Yaml cfg)
 
     try
     {
-        const int         argc    = 1;
-        char const* const argv[2] = {NODE_NAME, nullptr};
+        // build argc/argv for ROS:
+        std::vector<std::string> rosArgs = {NODE_NAME};
+        if (cfg.has("ros_args"))
+        {
+            ASSERT_(cfg["ros_args"].isSequence());
+            for (const auto& p : cfg["ros_args"].asSequenceRange())
+                rosArgs.push_back(p.as<std::string>());
+        }
 
-        // Initialize ROS:
+        // Convert to good old C (argc,argv):
+        std::vector<const char*> rosArgsC;
+        for (const auto& s : rosArgs) rosArgsC.push_back(s.c_str());
+
+        const int    argc = static_cast<int>(rosArgs.size());
+        const char** argv = rosArgsC.data();
+
         // Initialize ROS (only once):
         if (!rclcpp::ok()) { rclcpp::init(argc, argv); }
 
@@ -110,9 +123,7 @@ void BridgeROS2::ros_node_thread_main(Yaml cfg)
         auto ds_subscribe = cfg["subscribe"];
         if (!ds_subscribe.isSequence() || ds_subscribe.asSequence().empty())
         {
-            MRPT_LOG_INFO(
-                "No ROS2 topic found for subscription under YAML entry "
-                "`subscribe`.");
+            MRPT_LOG_INFO("No ROS2 topic found for subscription under YAML entry `subscribe`.");
         }
         else { internalAnalyzeTopicsToSubscribe(ds_subscribe); }
 
@@ -131,6 +142,16 @@ void BridgeROS2::ros_node_thread_main(Yaml cfg)
             std::chrono::microseconds(
                 static_cast<unsigned int>(1e6 * params_.period_publish_static_tfs)),
             [this]() { publishStaticTFs(); });
+
+        //
+        if (!params_.relocalize_from_topic.empty())
+        {
+            subInitPose_ =
+                rosNode()->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
+                    params_.relocalize_from_topic, rclcpp::SystemDefaultsQoS(),
+                    [this](const geometry_msgs::msg::PoseWithCovarianceStamped& o)
+                    { this->callbackOnRelocalizeTopic(o); });
+        }
 
         // Spin:
         rclcpp::spin(rosNode_);
@@ -168,6 +189,8 @@ void BridgeROS2::initialize_rds(const Yaml& c)
     YAML_LOAD_OPT(params_, forward_ros_tf_as_mola_odometry_observations, bool);
     YAML_LOAD_OPT(params_, wait_for_tf_timeout_milliseconds, int);
 
+    YAML_LOAD_OPT(params_, publish_localization_following_rep105, bool);
+
     if (cfg.has("base_footprint_to_base_link_tf"))
     {
         const auto s = cfg["base_footprint_to_base_link_tf"].as<std::string>();
@@ -184,6 +207,7 @@ void BridgeROS2::initialize_rds(const Yaml& c)
     YAML_LOAD_OPT(params_, period_publish_new_localization, double);
     YAML_LOAD_OPT(params_, period_publish_new_map, double);
     YAML_LOAD_OPT(params_, publish_tf_from_robot_pose_observations, bool);
+    YAML_LOAD_OPT(params_, relocalize_from_topic, std::string);
 
     // Launch ROS node:
     rosNodeThread_ = std::thread(&BridgeROS2::ros_node_thread_main, this, cfgCopy);
@@ -199,7 +223,7 @@ void BridgeROS2::spinOnce()
     ProfilerEntry tleg(profiler_, "spinOnce");
 
     // Publish odometry?
-    publishOdometry();
+    importRosOdometryToMOLA();
 
     // Check for new mola data sources?
     if (mrpt::Clock::nowDouble() - lastTimeCheckMolaSubs_ > params_.period_check_new_mola_subs)
@@ -329,7 +353,7 @@ void BridgeROS2::callbackOnOdometry(
     MRPT_END
 }
 
-void BridgeROS2::publishOdometry()
+void BridgeROS2::importRosOdometryToMOLA()
 {
     if (!params_.forward_ros_tf_as_mola_odometry_observations) return;
 
@@ -777,6 +801,7 @@ void BridgeROS2::internalOn(const mrpt::obs::CObservationRobotPose& obs)
         nav_msgs::msg::Odometry msg;
         msg.header.stamp    = myNow(obs.timestamp);
         msg.header.frame_id = params_.reference_frame;
+        msg.child_frame_id  = params_.base_link_frame;
 
         msg.pose = mrpt::ros2bridge::toROS_Pose(obs.pose);
 
@@ -904,7 +929,9 @@ void BridgeROS2::doLookForNewMolaSubs()
         ASSERT_(rds);
 
         // Skip myself!
-        if (std::string(rds->GetRuntimeClass()->className) == "mola::BridgeROS2"s) continue;
+        if (std::string(rds->GetRuntimeClass()->className) ==
+            std::string(this->GetRuntimeClass()->className))
+            continue;
 
         if (molaSubs_.dataSources.count(rds) == 0)
         {
@@ -1025,6 +1052,18 @@ void BridgeROS2::doLookForNewMolaSubs()
         srvMapSave_ = rosNode_->create_service<mola_msgs::srv::MapSave>(
             "map_save", std::bind(&BridgeROS2::service_map_save, this, _1, _2));
     }
+
+    // Advertise runtime MOLA parameters:
+    if (!srvParamGet_ && rosNode_)
+    {
+        using namespace std::placeholders;
+
+        srvParamGet_ = rosNode_->create_service<mola_msgs::srv::MolaRuntimeParamGet>(
+            "mola_runtime_param_get", std::bind(&BridgeROS2::service_param_get, this, _1, _2));
+
+        srvParamSet_ = rosNode_->create_service<mola_msgs::srv::MolaRuntimeParamSet>(
+            "mola_runtime_param_set", std::bind(&BridgeROS2::service_param_set, this, _1, _2));
+    }
 }
 
 void BridgeROS2::service_relocalize_from_gnss(
@@ -1060,6 +1099,17 @@ void BridgeROS2::service_relocalize_near_pose(
     }
 
     response->accepted = true;
+}
+
+void BridgeROS2::callbackOnRelocalizeTopic(const geometry_msgs::msg::PoseWithCovarianceStamped& o)
+{
+    auto lck = mrpt::lockHelper(rosPubsMtx_);
+
+    for (auto m : molaSubs_.relocalization)
+    {
+        const mrpt::poses::CPose3DPDFGaussian p = mrpt::ros2bridge::fromROS(o.pose);
+        m->relocalize_near_pose_pdf(p);
+    }
 }
 
 void BridgeROS2::service_map_load(
@@ -1104,6 +1154,86 @@ void BridgeROS2::service_map_save(
     response->error_message = r.error_message;
 }
 
+void BridgeROS2::service_param_get(
+    [[maybe_unused]] const std::shared_ptr<mola_msgs::srv::MolaRuntimeParamGet::Request> request,
+    std::shared_ptr<mola_msgs::srv::MolaRuntimeParamGet::Response>                       response)
+{
+    auto lck = mrpt::lockHelper(molaSubsMtx_);
+
+    mrpt::containers::yaml allParams = mrpt::containers::yaml::Map();
+
+    // Get all MOLA modules:
+    auto listMods = this->findService<mola::ExecutableBase>();
+    for (auto& m : listMods)
+    {
+        // Skip myself!
+        if (std::string(m->GetRuntimeClass()->className) ==
+            std::string(this->GetRuntimeClass()->className))
+            continue;
+
+        // Get params:
+        mrpt::containers::yaml params = m->getModuleParameters();
+        // add to YAML tree indexed by module name:
+        allParams[m->getModuleInstanceName()] = params;
+    }
+
+    std::stringstream                 ss;
+    mrpt::containers::YamlEmitOptions o;
+    o.emitHeader = false;
+    allParams.printAsYAML(ss, o);
+    response->parameters = ss.str();
+}
+
+void BridgeROS2::service_param_set(
+    const std::shared_ptr<mola_msgs::srv::MolaRuntimeParamSet::Request> request,
+    std::shared_ptr<mola_msgs::srv::MolaRuntimeParamSet::Response>      response)
+{
+    auto lck = mrpt::lockHelper(molaSubsMtx_);
+    try
+    {
+        mrpt::containers::yaml allParams;
+        {
+            std::stringstream ss(request->parameters);
+            allParams.loadFromStream(ss);
+            ASSERT_(allParams.isMap());
+        }
+
+        // Get all MOLA modules:
+        auto listMods = this->findService<mola::ExecutableBase>();
+        std::map<std::string, mola::ExecutableBase::Ptr> modsByName;
+        for (auto& m : listMods)
+        {
+            // Skip myself!
+            if (std::string(m->GetRuntimeClass()->className) ==
+                std::string(this->GetRuntimeClass()->className))
+                continue;
+            modsByName[m->getModuleInstanceName()] = m;
+        }
+
+        for (const auto& [k, v] : allParams.asMapRange())
+        {
+            const auto paramsModuleName = k.as<std::string>();
+            auto       itMod            = modsByName.find(paramsModuleName);
+            if (itMod == modsByName.end())
+                THROW_EXCEPTION_FMT(
+                    "Error: requested setting runtime parameter for non-existing MOLA module '%s'",
+                    paramsModuleName.c_str());
+
+            auto& m = itMod->second;
+            ASSERT_(m);
+            // Send change of parameters:
+            m->changeParameters(v);
+        }
+        // If we had no exceptions, it means we are ok.
+        response->success = true;
+    }
+    catch (const std::exception& e)
+    {
+        response->success       = false;
+        response->error_message = e.what();
+    }
+}
+
 rclcpp::Time BridgeROS2::myNow(const mrpt::Clock::time_point& observationStamp)
 {
     if (params_.publish_in_sim_time)
@@ -1146,17 +1276,22 @@ void BridgeROS2::timerPubLocalization()
 
     // 1/2: Publish to /tf:
     const std::string locLabel = (l->method.empty() ? "slam"s : l->method) + "/pose"s;
+    const std::string locQualityLabel =
+        (l->method.empty() ? "slam"s : l->method) + "/pose_quality"s;
 
     auto lck = mrpt::lockHelper(rosPubsMtx_);
 
     // Create the publisher the first time an observation arrives:
     const bool is_1st_pub = rosPubs_.pub_sensors.find(locLabel) == rosPubs_.pub_sensors.end();
     auto&      pub        = rosPubs_.pub_sensors[locLabel];
+    auto&      pubQuality = rosPubs_.pub_sensors[locQualityLabel];
 
     if (is_1st_pub)
     {
         pub = rosNode()->create_publisher<nav_msgs::msg::Odometry>(
             locLabel, rclcpp::SystemDefaultsQoS());
+        pubQuality = rosNode()->create_publisher<std_msgs::msg::Float32>(
+            locQualityLabel, rclcpp::SystemDefaultsQoS());
     }
     lck.unlock();
 
@@ -1164,14 +1299,49 @@ void BridgeROS2::timerPubLocalization()
         std::dynamic_pointer_cast<rclcpp::Publisher<nav_msgs::msg::Odometry>>(pub);
     ASSERT_(pubOdo);
 
-    // Send TF:
+    rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr pubOdoQuality =
+        std::dynamic_pointer_cast<rclcpp::Publisher<std_msgs::msg::Float32>>(pubQuality);
+    ASSERT_(pubOdoQuality);
+
+    // Send TF with localization result
+    // 1) Direct mode:    reference_frame ("map") -> base_link ("base_link")
+    // 2) Indirect mode:  map -> odom  (such as "map -> odom -> base_link" = "map -> base_link")
     tf2::Transform transform = mrpt::ros2bridge::toROS_tfTransform(l->pose);
 
     geometry_msgs::msg::TransformStamped tfStmp;
-    tfStmp.transform       = tf2::toMsg(transform);
-    tfStmp.child_frame_id  = params_.base_link_frame;
-    tfStmp.header.frame_id = params_.reference_frame;
-    tfStmp.header.stamp    = myNow(l->timestamp);
+    tfStmp.header.stamp = myNow(l->timestamp);
+    if (params_.publish_localization_following_rep105)
+    {
+        // Recompute:
+        mrpt::poses::CPose3D T_base_to_odom;
+        bool                 base_to_odom_ok = this->waitForTransform(
+                            T_base_to_odom, params_.odom_frame, params_.base_link_frame, true);
+        // Note: this wait above typ takes ~50 us
+
+        if (!base_to_odom_ok)
+        {
+            MRPT_LOG_ERROR_STREAM(
+                "publish_localization_following_rep105 is true but could not resolve tf for odom "
+                "-> base_link");
+        }
+        else
+        {
+            const tf2::Transform baseOnMap_tf = transform;
+
+            const tf2::Transform odomOnBase_tf =
+                mrpt::ros2bridge::toROS_tfTransform(T_base_to_odom);
+
+            tfStmp.transform       = tf2::toMsg(baseOnMap_tf * odomOnBase_tf);
+            tfStmp.child_frame_id  = params_.odom_frame;
+            tfStmp.header.frame_id = params_.reference_frame;
+        }
+    }
+    else
+    {
+        tfStmp.transform       = tf2::toMsg(transform);
+        tfStmp.child_frame_id  = params_.base_link_frame;
+        tfStmp.header.frame_id = params_.reference_frame;
+    }
     tf_bc_->sendTransform(tfStmp);
 
     // 2/2: Publish Odometry msg:
@@ -1180,6 +1350,7 @@ void BridgeROS2::timerPubLocalization()
         // Convert observation MRPT -> ROS
         nav_msgs::msg::Odometry msg;
         msg.header.stamp    = myNow(l->timestamp);
+        msg.child_frame_id  = params_.base_link_frame;
         msg.header.frame_id = params_.reference_frame;
 
         mrpt::poses::CPose3DPDFGaussian posePdf;
@@ -1189,6 +1360,13 @@ void BridgeROS2::timerPubLocalization()
         msg.pose = mrpt::ros2bridge::toROS_Pose(posePdf);
 
         pubOdo->publish(msg);
+    }
+
+    // And always publish quality:
+    {
+        std_msgs::msg::Float32 msg;
+        msg.data = l->quality;
+        pubOdoQuality->publish(msg);
     }
 }
 
