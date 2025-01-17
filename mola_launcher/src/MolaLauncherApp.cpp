@@ -243,7 +243,7 @@ void MolaLauncherApp::setup(
             ENSURE_YAML_ENTRY_EXISTS(ds, "params");
 
             // Allow quickly disabling sections:
-            if (ds.getOrDefault("launch_ignore", false)) continue;
+            if (!ds.getOrDefault("enabled", true)) continue;
 
             const auto ds_label = ds["name"].as<std::string>();
             ASSERTMSG_(!ds_label.empty(), "`name` cannot be empty!");
@@ -288,7 +288,7 @@ void MolaLauncherApp::setup(
                 // overwrite:
                 info.yaml_cfg_block = mola::load_yaml_file(absPathParamsFile);
 
-                // apend other entries:
+                // append other entries:
                 for (const auto& [k, v] : old.asMap())
                     info.yaml_cfg_block[k.as<std::string>()] = v;
             }

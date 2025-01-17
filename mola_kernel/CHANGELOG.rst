@@ -2,6 +2,31 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.5.1 (2024-12-29)
+------------------
+* NavStateFilter API: add estimated_trajectory()
+* Contributors: Jose Luis Blanco-Claraco
+
+1.5.0 (2024-12-26)
+------------------
+* NavStateFilter Interface now also inherits from ExecutableBase for convenience
+* MinimalModuleContainer ctor should not be explicit
+* Add mola::MinimalModuleContainer
+* Drop dependency on mrpt-gui in kernel by abstracting MolaViz subwindow layout operations
+* Contributors: Jose Luis Blanco-Claraco
+
+1.4.1 (2024-12-20)
+------------------
+
+1.4.0 (2024-12-18)
+------------------
+* MOLA system yaml files: added "enabled" optional property for modules and rds visualizers
+* Add field for localization quality
+* cmake: remove duplicated info message
+* ExecutableBase: Add support for runtime-configurable parameter API
+* mola-kernel Doxygen docs: add groups
+* Contributors: Jose Luis Blanco-Claraco
+
 1.3.0 (2024-12-11)
 ------------------
 * NavStateFilter interface: add API for merging GNSS observations

@@ -3,6 +3,28 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+1.5.1 (2024-12-29)
+------------------
+
+1.5.0 (2024-12-26)
+------------------
+
+1.4.1 (2024-12-20)
+------------------
+* BridgeROS2: add option (now enabled by default) to publish /tfs following REP105 order
+* BUG FIX: Published odometry msg lacked target frame_id
+* Rename method for better reflecting its goal
+* Contributors: Jose Luis Blanco-Claraco
+
+1.4.0 (2024-12-18)
+------------------
+* Publish localization quality topic
+* Forward --ros-args to BridgeROS2
+* expose services for runtime parameters
+* Load relocalize_from_topic from yaml file
+* ros2bridge: handle /initialpose topic -> relocalize service
+* Contributors: Jose Luis Blanco-Claraco
+
 1.3.0 (2024-12-11)
 ------------------
 * Support publishing IMU readings MOLA -> ROS2
