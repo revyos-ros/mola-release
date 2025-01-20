@@ -2,6 +2,18 @@
 Changelog for package mola_viz
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.5.1 (2024-12-29)
+------------------
+
+1.5.0 (2024-12-26)
+------------------
+* Drop dependency on mrpt-gui in kernel by abstracting MolaViz subwindow layout operations
+* MolaViz: show package name in GUI windows
+* Contributors: Jose Luis Blanco-Claraco
+
+1.4.1 (2024-12-20)
+------------------
+
 1.4.0 (2024-12-18)
 ------------------
 
