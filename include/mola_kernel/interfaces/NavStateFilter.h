@@ -5,16 +5,18 @@
  * ------------------------------------------------------------------------- */
 /**
  * @file   NavStateFilter.h
- * @brief  Virtual base class for algorithms to fuse odometry, twist, IMU, etc.
+ * @brief  Virtual base class for navigation state estimation algorithms.
  * @author Jose Luis Blanco Claraco
  * @date   Jan 22, 2024
  */
 #pragma once
 
+#include <mola_kernel/interfaces/ExecutableBase.h>
 #include <mrpt/containers/yaml.h>
 #include <mrpt/core/Clock.h>
 #include <mrpt/math/TTwist3D.h>
 #include <mrpt/obs/obs_frwds.h>
+#include <mrpt/poses/CPose3DInterpolator.h>
 #include <mrpt/poses/CPose3DPDFGaussian.h>
 #include <mrpt/poses/CPose3DPDFGaussianInf.h>
 #include <mrpt/system/COutputLogger.h>
@@ -49,11 +51,14 @@ struct NavState
     std::string asString() const;
 };
 
-/** Unified API for kinematic state filtering algorithms,
- *  fusing information from multiple odometry or twist sources.
+/** Virtual API for kinematic state filtering algorithms,
+ *  fusing information from multiple odometry or twist sources, IMU, GNSS, etc.
+ *
+ *  Refer to the "state estimation section"
+ *  in [the docs](https://docs.mola-slam.org/)
  *
  * \ingroup mola_kernel_interfaces_grp */
-class NavStateFilter : public mrpt::system::COutputLogger
+class NavStateFilter : public mola::ExecutableBase
 {
    public:
     NavStateFilter();
@@ -62,11 +67,8 @@ class NavStateFilter : public mrpt::system::COutputLogger
     /** Resets the estimator state to an initial state */
     virtual void reset() = 0;
 
-    /**
-     * @brief Initializes the object and reads all parameters from a YAML node.
-     * @param cfg a YAML node with a dictionary of parameters to load from.
-     */
-    virtual void initialize(const mrpt::containers::yaml& cfg) = 0;
+    // initialize(): inherited from ExecutableBase. Must be implemented to load
+    // parameters, etc.
 
     /** Integrates new SE(3) pose estimation of the vehicle wrt frame_id
      */
@@ -104,6 +106,20 @@ class NavStateFilter : public mrpt::system::COutputLogger
     virtual std::optional<NavState> estimated_navstate(
         const mrpt::Clock::time_point& timestamp,
         const std::string&             frame_id) = 0;
+
+    /** (Optional virtual method) Returns the estimated trajectory (sequence of
+     * timestamped poses) between two time points, in the given frame_id.
+     *  \return std::nullopt if not implemented or not able to compute for the
+     *          requested time interval.
+     */
+    virtual std::optional<mrpt::poses::CPose3DInterpolator>
+        estimated_trajectory(
+            [[maybe_unused]] const mrpt::Clock::time_point& start_time,
+            [[maybe_unused]] const mrpt::Clock::time_point& end_time,
+            [[maybe_unused]] const std::string&             frame_id)
+    {
+        return {};  // Default: none
+    }
 
     /** Must be invoked with the mp2p_icp metric map geo-referencing information
      *  of the map in order to have GNSS observations correctly fused.
