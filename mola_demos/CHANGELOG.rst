@@ -2,6 +2,15 @@
 Changelog for package mola_demos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.5.1 (2024-12-29)
+------------------
+
+1.5.0 (2024-12-26)
+------------------
+
+1.4.1 (2024-12-20)
+------------------
+
 1.4.0 (2024-12-18)
 ------------------
 * MOLA system yaml files: added "enabled" optional property for modules and rds visualizers
