@@ -31,23 +31,29 @@ MOLA
 .. toctree::
   :maxdepth: 2
   :hidden:
+  :caption: State estimation
+
+  mola_state_estimators
+
+.. toctree::
+  :maxdepth: 2
+  :hidden:
   :caption: mp2p_icp
 
   module-mp2p-icp
   mp2p_icp_basics
   mp2p_icp_optimal-transformations
   mp2p_icp_applications
-  mp2p_icp_demos
 
 .. toctree::
   :maxdepth: 2
   :hidden:
   :caption: Learn more
 
-  mola_architecture
   tutorials
-  supported-sensors
+  mola_architecture
   dataset-conversions
+  supported-sensors
   modules
   doxygen-index
   bibliography
@@ -56,7 +62,7 @@ MOLA
 :octicon:`mark-github` `MOLA`_ is a Modular system for Localization and Mapping.
 
 Get started:
- - Read: :ref:`building-maps`.
+ - Follow the tutorials: :ref:`Building your first map <building-maps>`, :ref:`Mapping and localization <tutorial-mola-lo-map-and-localize>`.
  - Read :octicon:`rocket` :ref:`mola_lidar_odometry` documentation.
  - See :ref:`use-cases` for examples of use.
  - See :ref:`installing` and :ref:`how to cite it <citing_mola>`.
@@ -86,6 +92,11 @@ Get started:
    :scale: 100%
    :align: middle
    :target: https://index.ros.org/search/?term=mp2p_icp
+
+.. |badgeHrel_SE| image:: https://img.shields.io/ros/v/humble/mola_state_estimation
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola_state_estimation
 
 .. iron badges ------
 
@@ -121,6 +132,10 @@ Get started:
    :align: middle
    :target: https://index.ros.org/search/?term=mp2p_icp
 
+.. |badgeJrel_SE| image:: https://img.shields.io/ros/v/jazzy/mola_state_estimation
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola_state_estimation
 
 .. rolling badges ------
 
@@ -138,6 +153,11 @@ Get started:
    :scale: 100%
    :align: middle
    :target: https://index.ros.org/search/?term=mp2p_icp
+
+.. |badgeRrel_SE| image:: https://img.shields.io/ros/v/rolling/mola_state_estimation
+   :scale: 100%
+   :align: middle
+   :target: https://index.ros.org/search/?term=mola_state_estimation
 
 
 .. _installing:
@@ -161,6 +181,7 @@ How to install all MOLA modules:
         # Install core MOLA modules and 3D LiDAR odometry:
         sudo apt install \
          ros-$ROS_DISTRO-mola \
+         ros-$ROS_DISTRO-mola-state-estimation \
          ros-$ROS_DISTRO-mola-lidar-odometry
 
         # (OPTIONAL) Install example small datasets to run demos/unit tests:
@@ -187,6 +208,8 @@ How to install all MOLA modules:
     | MOLA                 | |badgeHrel|        | |badgeJrel|    | |badgeRrel|    |
     +----------------------+--------------------+----------------+----------------+
     | mola_lidar_odometry  | |badgeHrel_LO|     | |badgeJrel_LO| | |badgeRrel_LO| |
+    +----------------------+--------------------+----------------+----------------+
+    | mola_state_estimation| |badgeHrel_SE|     | |badgeJrel_SE| | |badgeRrel_SE| |
     +----------------------+--------------------+----------------+----------------+
     | mp2p_icp             | |badgeHrel_MP|     | |badgeJrel_MP| | |badgeRrel_MP| |
     +----------------------+--------------------+----------------+----------------+
@@ -220,6 +243,7 @@ How to install all MOLA modules:
         git clone https://github.com/MOLAorg/mola_common.git
         git clone https://github.com/MOLAorg/mp2p_icp.git --recursive
         git clone https://github.com/MOLAorg/mola.git --recursive
+        git clone https://github.com/MOLAorg/mola_state_estimation.git
         git clone https://github.com/MOLAorg/mola_test_datasets.git
 
         # MOLA lidar odometry package:
