@@ -5,7 +5,7 @@ Georeferencing
 ======================
 Georeferencing trajectories and metric maps is implemented in the :ref:`mola_sm_loop_closure <mola_licenses>` package.
 
-The concept of using simple-maps as intermediary map format together with the layered metric map format (see :cite:`blanco2024mola_lo`)
+The concept of using simple-maps as intermediary map format together with the layered metric map format (see :cite:`blanco2025mola_lo`)
 enables embedding georeferenced coordinates to any kind of map typically used in robotics: grid maps, voxel maps, point clouds, etc.
 
 |
@@ -41,7 +41,7 @@ First, build a simple-map from a dataset or a live robot as described in :ref:`b
 Make sure of having a GPS (GNSS) sensor source emitting observations, and that they were captured
 by MOLA-LO (see :ref:`the corresponding variable <mola_lo_pipeline_sensor_inputs>` in the LO pipeline).
 
-Then, build the corresponding metric map by applying a metric map generation pipeline (see :cite:`blanco2024mola_lo`
+Then, build the corresponding metric map by applying a metric map generation pipeline (see :cite:`blanco2025mola_lo`
 or :ref:`this step  <building-maps_step_mm>` in the tutorial: 
 
 .. code-block:: bash
@@ -162,4 +162,17 @@ for example in KML format suitable for visualization in Google Earth.
 4. Georeferenced maps in mm-viewer
 ----------------------------------------
 Write me!
+
+|
+
+5. View GPS readings on a georeferenced map
+--------------------------------------------
+Once you have published a georeferenced map (via `mrpt_map_server` or directly from `mola_lidar_odometry`),
+you can visualize in RViz or FoxGlove the localization from the GNSS sensor and its covariance uncertainty
+by installing `mola_gnss_to_markers <https://github.com/MOLAorg/mola_gnss_to_markers>`_ and then:
+
+
+.. code-block:: bash
+
+   ros2 launch mola_gnss_to_markers mola_gnss_to_markers_launch.py
 
