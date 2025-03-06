@@ -3,6 +3,35 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+1.6.2 (2025-02-22)
+------------------
+* Implement publish Diagnostics per mola module & ROS2 publishers refactored (code clean up)
+* BridgeROS2: add source filter for forwarding localization updates to ROS2
+* ROS2: base_footprint_frame /tf is broadcasted now as base_link -> base_footprint to avoid /tf warnings (better as a child than as a second parent in the tf tree)
+* FIX: In parsing base_footprint_to_base_link_tf
+* Contributors: Jose Luis Blanco Claraco, Jose Luis Blanco-Claraco
+
+1.6.1 (2025-02-13)
+------------------
+* Add new option: publish_tf_from_slam; add better docs on the meaning of all parameters
+* Publish georef /tf as /tf_static
+* ROS2 bridge now publishes georeferenced map metadata as /tf's and as mrpt_nav_interfaces/GeoreferencingMetadata
+* Revert "Feature: all MOLA modules got its MRPT logger to ROS console for easier debugging"
+  This reverts commit 8a84611d85022f37b80d8bdcb7acaa1910669fc1.
+* FIX: wrong variable in former commit
+* Merge pull request `#75 <https://github.com/MOLAorg/mola/issues/75>`_ from MOLAorg/feature/mrpt-to-ros-console
+  Feature: all MOLA modules got its MRPT logger to ROS console for easier debugging
+* Feature: all MOLA modules got its MRPT logger to ROS console for easier debugging
+* Contributors: Jose Luis Blanco-Claraco
+
+1.6.0 (2025-01-21)
+------------------
+* Publish gridmaps too
+* ros2 bridge: rep105 only for map->base_link tfs
+* BridgeROS2: support forwarding more than one localization message per timer call
+* Fix published /tf's: those from LocalizationSources now can explicitly define their parent and child frames
+* Contributors: Jose Luis Blanco-Claraco
+
 1.5.1 (2024-12-29)
 ------------------
 
