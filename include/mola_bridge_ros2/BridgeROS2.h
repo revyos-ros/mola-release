@@ -12,6 +12,7 @@
 #pragma once
 
 // MOLA virtual interfaces:
+#include <mola_kernel/Georeferencing.h>
 #include <mola_kernel/interfaces/ExecutableBase.h>
 #include <mola_kernel/interfaces/LocalizationSourceBase.h>
 #include <mola_kernel/interfaces/MapServer.h>
@@ -21,6 +22,7 @@
 #include <mola_kernel/interfaces/Relocalization.h>
 
 // MRPT:
+#include <mrpt/maps/COccupancyGridMap2D.h>
 #include <mrpt/obs/CObservationGPS.h>
 #include <mrpt/obs/CObservationIMU.h>
 #include <mrpt/obs/CObservationImage.h>
@@ -113,11 +115,12 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
 
     struct Params
     {
-        /// tf frame name with respect to sensor poses are measured:
+        /// tf frame name with respect to sensor poses are measured, and also used for publishing
+        /// SLAM/localization results (read below).
         std::string base_link_frame = "base_link";
 
-        /// If not empty, the node will broadcast a static /tf from base_link to
-        /// base_footprint with the TF base_footprint_to_base_link_tf at start
+        /// If not empty, the node will broadcast a static /tf from base_footprint to
+        /// base_link with the TF base_footprint_to_base_link_tf at start
         /// up.
         /// Normally: "base_footprint"
         std::string base_footprint_frame;  // Disabled by default
@@ -125,22 +128,47 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         /// YAML format: "[x y z yaw pitch roll]" (meters & degrees)
         mrpt::math::TPose3D base_footprint_to_base_link_tf = {0, 0, 0, 0, 0, 0};
 
-        /// tf frame name for odometry's frame of reference:
+        /// Used for:
+        /// (a) importing odometry to MOLA if ``forward_ros_tf_as_mola_odometry_observations=true``
+        /// (b) querying ``${odom_frame} => ${base_link_frame}`` when
+        ///     ``publish_localization_following_rep105=true``.
         std::string odom_frame = "odom";
 
-        /// tf frame name for odometry's frame of reference:
+        /// tf frame used for:
+        /// (a) See ``publish_tf_from_robot_pose_observations``
+        /// (b) To follow REP105 (``publish_localization_following_rep105``), this must match
+        ///     the frame used as reference in the LocalizationSource (e.g. mola_lidar_odometry)
         std::string reference_frame = "map";
 
-        /// Direct mode (false):
-        ///   reference_frame ("map") -> base_link ("base_link")
+        /// How to publish localization to /tf:
+        /// - ``false``(direct mode): reference_frame ("map") -> base_link ("base_link")
+        ///   Note that reference_frame in this case comes from the localization source module
+        ///   (e.g. mola_lida_odometry), it is not configured here.
         ///
-        ///  Indirect mode (true), following ROS REP 105 https://ros.org/reps/rep-0105.html
-        ///   map -> odom  (such as "map -> odom -> base_link" = "map -> base_link")
+        ///  - ``true`` (indirect mode), following ROS [REP
+        ///  105](https://ros.org/reps/rep-0105.html):
+        ///   ``map -> odom``  (such as "map -> odom -> base_link" = "map -> base_link")
         bool publish_localization_following_rep105 = true;
 
+        /// If enabled, during spinOnce(), the tf ``${odom_frame} => ${base_link_frame}`` will
+        /// be queried and forwarded as an `CObservationOdometry` reading to the MOLA subsystem:
         bool forward_ros_tf_as_mola_odometry_observations = false;
-        bool publish_odometry_msgs_from_slam              = true;
 
+        /// If enabled, SLAM/Localization results will be published as nav_msgs/Odometry messages.
+        bool publish_odometry_msgs_from_slam = true;
+
+        // Which source will be forwarded (empty=any)
+        std::string publish_odometry_msgs_from_slam_source = {};
+
+        /// If enabled, SLAM/Localization results will be published as tf messages, for frames
+        /// according to explained above for `publish_localization_following_rep105`.
+        bool publish_tf_from_slam = true;
+
+        // Which source will be forwarded (empty=any)
+        std::string publish_tf_from_slam_source = {};
+
+        /// If enabled, robot pose observations (typically, ground truth from datasets), will be
+        /// forwarded to ROS as /tf messages: ``${reference_frame} => ${base_link}``
         bool publish_tf_from_robot_pose_observations = true;
 
         std::string relocalize_from_topic = "/initialpose";  //!< Default in RViz
@@ -152,10 +180,15 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         double period_publish_new_localization = 0.2;  // [s]
         double period_publish_new_map          = 5.0;  // [s]
         double period_publish_static_tfs       = 1.0;  // [s]
+        double period_publish_diagnostics      = 1.0;  // [s]
 
         double period_check_new_mola_subs = 1.0;  // [s]
 
         int wait_for_tf_timeout_milliseconds = 100;
+
+        std::string georef_map_reference_frame = "map";
+        std::string georef_map_utm_frame       = "utm";
+        std::string georef_map_enu_frame       = "enu";
     };
 
     Params params_;
@@ -225,20 +258,28 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     /// or the equivalent of the passed argument in ROS 2 format otherwise.
     rclcpp::Time myNow(const mrpt::Clock::time_point& observationStamp);
 
-    struct RosPubs
+    /// Generic Map <topic> => publisher
+    std::map<std::string, rclcpp::PublisherBase::SharedPtr> rosPubs_;
+    std::mutex                                              rosPubsMtx_;
+
+    /// Gets or creates (upon first use) a publisher for a given type:
+    template <typename MSG_TYPE>
+    [[nodiscard]] auto get_publisher(const std::string& topic, const rclcpp::QoS& qos)
+        -> std::shared_ptr<rclcpp::Publisher<MSG_TYPE>>
     {
-        /// Map <sensor_label> => publisher
-        std::map<std::string, rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr> pub_poses;
+        auto lck = mrpt::lockHelper(rosPubsMtx_);
 
-        /// Map <sensor_label> => publisher
-        std::map<std::string, rclcpp::PublisherBase::SharedPtr> pub_sensors;
+        // Create the publisher the first time an observation arrives:
+        const bool is_1st_pub = rosPubs_.find(topic) == rosPubs_.end();
+        auto&      pub        = rosPubs_[topic];
 
-        // rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr
-        // pub_markers;
-    };
+        if (is_1st_pub) { pub = rosNode()->create_publisher<MSG_TYPE>(topic, qos); }
+        lck.unlock();
 
-    RosPubs    rosPubs_;
-    std::mutex rosPubsMtx_;
+        auto ret = std::dynamic_pointer_cast<rclcpp::Publisher<MSG_TYPE>>(pub);
+        ASSERT_(ret);
+        return ret;
+    }
 
     struct MolaSubs
     {
@@ -290,7 +331,7 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
     void onNewMap(const mola::MapSourceBase::MapUpdate& m);
 
     std::mutex                                                         lastLocMapMtx_;
-    std::optional<mola::LocalizationSourceBase::LocalizationUpdate>    lastLoc_;
+    std::vector<mola::LocalizationSourceBase::LocalizationUpdate>      lastLocUpdates_;
     std::map<std::string /*map_name*/, mola::MapSourceBase::MapUpdate> lastMaps_;
 
     void timerPubLocalization();
@@ -310,9 +351,16 @@ class BridgeROS2 : public RawDataSourceBase, public mola::RawDataConsumer
         const mrpt::obs::CObservationPointCloud& obs, bool isSensorTopic,
         const std::string& sSensorFrameId);
 
+    void internalPublishGridMap(
+        const mrpt::maps::COccupancyGridMap2D& m, const std::string& sMapTopicName,
+        const std::string& sReferenceFrame);
+
     void internalAnalyzeTopicsToSubscribe(const mrpt::containers::yaml& ds_subscribe);
 
     void publishStaticTFs();
+    void publishDiagnostics();
+    void publishMetricMapGeoreferencingData(
+        const mola::Georeferencing& g, const std::string& georefTopic);
 };
 
 }  // namespace mola
