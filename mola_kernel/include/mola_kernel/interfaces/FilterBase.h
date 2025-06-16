@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -23,36 +23,36 @@ namespace mola
  * immediately send them to a worker thread that works on it, possibly
  * publishing the output via `sendObservationsToFrontEnds()`.
  * \ingroup mola_kernel_interfaces_grp */
-class FilterBase : public RawDataSourceBase, RawDataConsumer
+class FilterBase : public RawDataSourceBase, public RawDataConsumer
 {
 #if MRPT_VERSION < 0x020e00
-    DEFINE_VIRTUAL_MRPT_OBJECT(FilterBase)
+  DEFINE_VIRTUAL_MRPT_OBJECT(FilterBase)
 #else
-    DEFINE_VIRTUAL_MRPT_OBJECT(FilterBase, mola)
+  DEFINE_VIRTUAL_MRPT_OBJECT(FilterBase, mola)
 #endif
-   public:
-    FilterBase();
+ public:
+  FilterBase();
 
-    /** @name Virtual interface of any Filter
-     *{ */
+  /** @name Virtual interface of any Filter
+   *{ */
 
-    /** To be called for each incoming observation. Process it and return
-     * the modified observation.
-     */
-    virtual CObservation::Ptr doFilter(const CObservation::Ptr& o) = 0;
-    /** @} */
+  /** To be called for each incoming observation. Process it and return
+   * the modified observation.
+   */
+  virtual CObservation::Ptr doFilter(const CObservation::Ptr& o) = 0;
+  /** @} */
 
-    void spinOnce() override;
+  void spinOnce() override;
 
-    // Virtual interface of any RawDataConsumer
-    void onNewObservation(const CObservation::Ptr& o) override;
+  // Virtual interface of any RawDataConsumer
+  void onNewObservation(const CObservation::Ptr& o) override;
 
-   protected:
-    // Virtual interface of any RawDataSource
-    void initialize_rds(const Yaml& cfg) override;
+ protected:
+  // Virtual interface of any RawDataSource
+  void initialize_rds(const Yaml& cfg) override;
 
-   private:
-    mrpt::WorkerThreadsPool thread_pool_;
+ private:
+  mrpt::WorkerThreadsPool thread_pool_;
 };
 
 }  // namespace mola

@@ -2,7 +2,7 @@
 #        A Modular Optimization framework for Localization and mApping
 #                               (MOLA)
 #
-# Copyright (C) 2018-2024, Jose Luis Blanco-Claraco, contributors (AUTHORS.md)
+# Copyright (C) 2018-2025, Jose Luis Blanco-Claraco, contributors (AUTHORS.md)
 # All rights reserved.
 # Released under GNU GPL v3. See LICENSE file
 # ------------------------------------------------------------------------------
@@ -43,7 +43,6 @@ mola_add_library(
     mrpt::ros2bridge
     tf2::tf2
     rosbag2_cpp::rosbag2_cpp
-    #nav_msgs
     tf2_geometry_msgs::tf2_geometry_msgs
     tf2_msgs::tf2_msgs__rosidl_typesupport_cpp
     sensor_msgs::sensor_msgs_library
@@ -54,40 +53,9 @@ mola_add_library(
     mrpt-ros2bridge
 )
 
-# Credits: https://gist.github.com/jtanx/96ded5e050d5ee5b19804195ee5cf5f9
-function(pad_string output str padchar length)
-  string(LENGTH "${str}" _strlen)
-  math(EXPR _strlen "${length} - ${_strlen}")
-
-  if(_strlen GREATER 0)
-    string(REPEAT ${padchar} ${_strlen} _pad)
-    string(PREPEND str ${_pad})
-  endif()
-
-  set(${output} "${str}" PARENT_SCOPE)
-endfunction()
-
-# 2 hex digits for each version part:
-# For example: "0.5.1"  => "0x000501"
-macro(mrpt_version_to_hex VER TARGET_VAR_NAME)
-  string(REGEX MATCHALL "[0-9]+" __parts "${${VER}}")
-
-  if(__parts)
-    list(GET __parts 0 __VERSION_NUMBER_MAJOR)
-    list(GET __parts 1 __VERSION_NUMBER_MINOR)
-    list(GET __parts 2 __VERSION_NUMBER_PATCH)
-    pad_string(__VERSION_NUMBER_MAJOR ${__VERSION_NUMBER_MAJOR} "0" 2)
-    pad_string(__VERSION_NUMBER_MINOR ${__VERSION_NUMBER_MINOR} "0" 2)
-    pad_string(__VERSION_NUMBER_PATCH ${__VERSION_NUMBER_PATCH} "0" 2)
-    set(${TARGET_VAR_NAME} "0x${__VERSION_NUMBER_MAJOR}${__VERSION_NUMBER_MINOR}${__VERSION_NUMBER_PATCH}")
-  else()
-    set(${TARGET_VAR_NAME} "0x000")
-  endif()
-endmacro()
-
 # Convert package versions to hex so they can be used in preprocessor for wider
 # versions compatibility of "one-source for all":
-mrpt_version_to_hex(cv_bridge_VERSION  cv_bridge_VERSION_HEX)
+mola_version_to_hexadecimal(cv_bridge_VERSION_HEX ${cv_bridge_VERSION})
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE CV_BRIDGE_VERSION=${cv_bridge_VERSION_HEX})
 
