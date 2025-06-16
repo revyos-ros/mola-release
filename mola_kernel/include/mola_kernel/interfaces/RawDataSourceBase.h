@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -31,70 +31,76 @@ using timestep_t = std::size_t;
 class RawDataSourceBase : public mola::ExecutableBase
 {
 #if MRPT_VERSION < 0x020e00
-    DEFINE_VIRTUAL_MRPT_OBJECT(RawDataSourceBase)
+  DEFINE_VIRTUAL_MRPT_OBJECT(RawDataSourceBase)
 #else
-    DEFINE_VIRTUAL_MRPT_OBJECT(RawDataSourceBase, mola)
+  DEFINE_VIRTUAL_MRPT_OBJECT(RawDataSourceBase, mola)
 #endif
 
-   public:
-    RawDataSourceBase();
-    virtual ~RawDataSourceBase();
+ public:
+  RawDataSourceBase();
+  virtual ~RawDataSourceBase();
 
-    /** Attach this object to a consumer. A shared_ptr is created to keep a
-     * reference to the object. */
-    void attachToDataConsumer(RawDataConsumer& rdc);
+  // Delete copy constructor and copy assignment operator
+  RawDataSourceBase(const RawDataSourceBase&)            = delete;
+  RawDataSourceBase& operator=(const RawDataSourceBase&) = delete;
 
-    /** Loads common parameters for all RDS.
-     * This handles:
-     * - `gui_preview_sensors`: Enable displaying sensor data in a subwindow.
-     * - `export_to_rawlog`: If defined, save observations to the given rawlog
-     * file.
-     * - `force_load_lazy_load`: (Default=false) Force load() on all incoming
-     * observations.
-     * - `quit_mola_app_on_dataset_end`: (Default=false) Quits the MOLA app when
-     * end of dataset is reached.
-     */
-    void initialize(const Yaml& cfg) override final;
+  // Delete move constructor and move assignment operator
+  RawDataSourceBase(RawDataSourceBase&&)            = delete;
+  RawDataSourceBase& operator=(RawDataSourceBase&&) = delete;
 
-   protected:
-    /** Loads children specific parameters */
-    virtual void initialize_rds(const Yaml& cfg) = 0;
+  /** Attach this object to a consumer. A shared_ptr is created to keep a
+   * reference to the object. */
+  void attachToDataConsumer(RawDataConsumer& rdc);
 
-   public:
-   protected:
-    /** Send an observation to the associated target front-ends */
-    void sendObservationsToFrontEnds(const CObservation::Ptr& obs);
+  /** Loads common parameters for all RDS.
+   * This handles:
+   * - `gui_preview_sensors`: Enable displaying sensor data in a subwindow.
+   * - `export_to_rawlog`: If defined, save observations to the given rawlog
+   * file.
+   * - `force_load_lazy_load`: (Default=false) Force load() on all incoming
+   * observations.
+   * - `quit_mola_app_on_dataset_end`: (Default=false) Quits the MOLA app when
+   * end of dataset is reached.
+   */
+  void initialize(const Yaml& cfg) override final;
 
-    /** Make sure the observation is loaded in memory (for externally-stored
-     * classes), etc. Only has effect if the option `force_load_lazy_load` was
-     * set to `true` */
-    virtual void prepareObservationBeforeFrontEnds(
-        const CObservation::Ptr& obs) const;
+ protected:
+  /** Loads children specific parameters */
+  virtual void initialize_rds(const Yaml& cfg) = 0;
 
-    /** Should be called by derived classes if the end of a dataset was reached
-     * during spin()  */
-    void onDatasetPlaybackEnds();
+ public:
+ protected:
+  /** Send an observation to the associated target front-ends */
+  void sendObservationsToFrontEnds(const CObservation::Ptr& obs);
 
-   private:
-    /** Target of captured data */
-    std::vector<RawDataConsumer*> rdc_;
+  /** Make sure the observation is loaded in memory (for externally-stored
+   * classes), etc. Only has effect if the option `force_load_lazy_load` was
+   * set to `true` */
+  virtual void prepareObservationBeforeFrontEnds(const CObservation::Ptr& obs) const;
 
-    /** used to optionally export captured observations to an MRPT rawlog */
-    mrpt::io::CFileGZOutputStream export_to_rawlog_out_;
-    mrpt::WorkerThreadsPool       worker_pool_export_rawlog_{
-        1, mrpt::WorkerThreadsPool::POLICY_FIFO, "worker_pool_export_rawlog"};
+  /** Should be called by derived classes if the end of a dataset was reached
+   * during spin()  */
+  void onDatasetPlaybackEnds();
 
-    mrpt::WorkerThreadsPool gui_updater_threadpool_{
-        1 /* 1 thread */, mrpt::WorkerThreadsPool::POLICY_FIFO,
-        "gui_updater_threadpool"};
+ private:
+  /** Target of captured data */
+  std::vector<RawDataConsumer*> rdc_;
 
-    struct SensorViewerImpl;
-    /** Optional real-time GUI view of sensor data. Viewers indexed by
-     * sensor_label */
-    std::map<std::string, mrpt::pimpl<SensorViewerImpl>> sensor_preview_gui_;
+  /** used to optionally export captured observations to an MRPT rawlog */
+  mrpt::io::CFileGZOutputStream export_to_rawlog_out_;
+  mrpt::WorkerThreadsPool       worker_pool_export_rawlog_{
+      1, mrpt::WorkerThreadsPool::POLICY_FIFO, "worker_pool_export_rawlog"};
 
-    bool force_load_lazy_load_         = false;
-    bool quit_mola_app_on_dataset_end_ = false;
+  mrpt::WorkerThreadsPool gui_updater_threadpool_{
+      1 /* 1 thread */, mrpt::WorkerThreadsPool::POLICY_FIFO, "gui_updater_threadpool"};
+
+  struct SensorViewerImpl;
+  /** Optional real-time GUI view of sensor data. Viewers indexed by
+   * sensor_label */
+  std::map<std::string, mrpt::pimpl<SensorViewerImpl>> sensor_preview_gui_;
+
+  bool force_load_lazy_load_         = false;
+  bool quit_mola_app_on_dataset_end_ = false;
 };
 
 }  // namespace mola
