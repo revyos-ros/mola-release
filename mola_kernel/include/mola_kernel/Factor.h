@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -31,9 +31,8 @@ namespace mola
  * \ingroup mola_kernel_grp
  */
 using Factor = std::variant<
-    std::monostate, FactorRelativePose3, FactorConstVelKinematics,
-    FactorStereoProjectionPose, SmartFactorStereoProjectionPose, SmartFactorIMU,
-    FactorOther>;
+    std::monostate, FactorRelativePose3, FactorConstVelKinematics, FactorStereoProjectionPose,
+    SmartFactorStereoProjectionPose, SmartFactorIMU, FactorOther>;
 
 /** Return a reference to the FactorBase associated to the variant f */
 FactorBase& factor_get_base(Factor& f);
