@@ -3,6 +3,45 @@ Changelog for package mola_bridge_ros2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+1.9.0 (2025-06-06)
+------------------
+* fix clang-format
+* Implement publishing of optional "metadata" map field too
+* Contributors: Jose Luis Blanco-Claraco
+
+1.8.1 (2025-05-28)
+------------------
+* Fix: Do not use the deprecated ament_target_dependencies()
+* Contributors: Jose Luis Blanco-Claraco
+
+1.8.0 (2025-05-25)
+------------------
+* Update license tag to "BSD-3-Clause"
+* Update copyright year
+* Contributors: Jose Luis Blanco-Claraco
+
+1.7.0 (2025-05-06)
+------------------
+
+1.6.4 (2025-04-23)
+------------------
+* fix: Correctly handling Livox cloud timestamps ("double"s, but in nanoseconds) in BridgeROS2 and bag2 data sources. They are automatically detected, no need to change any parameter.
+* modernize clang-format
+* Merge pull request `#82 <https://github.com/MOLAorg/mola/issues/82>`_ from ahpinder/develop
+  Add Support for Voxel Map ROS2 Publishing Via Point Map Conversion
+* fixed Clang formatting
+* Clean up voxel map publishing code
+* Added voxel map point cloud publishing
+  Added code to timerPubMap to publish the occupied voxels of a mrpt::maps::CVoxelMap as a point cloud to ROS2, allowing for real-time ROS2 visualization of 2D map capture
+* Contributors: Jose Luis Blanco-Claraco, ahpinder
+
+1.6.3 (2025-03-15)
+------------------
+* clang-tidy: const correctness
+* Service renamed: RelocalizeFromGNSS -> RelocalizeFromStateEstimator
+* FIX: Potential deadlock in initialization
+* Contributors: Jose Luis Blanco-Claraco
+
 1.6.2 (2025-02-22)
 ------------------
 * Implement publish Diagnostics per mola module & ROS2 publishers refactored (code clean up)

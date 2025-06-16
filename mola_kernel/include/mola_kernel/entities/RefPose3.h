@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -25,9 +25,9 @@ namespace mola
  */
 class RefPose3 : public EntityBase
 {
-    DEFINE_SERIALIZABLE(RefPose3, mola)
+  DEFINE_SERIALIZABLE(RefPose3, mola)
 
-   public:
+ public:
 };
 
 }  // namespace mola
