@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -17,7 +17,7 @@ namespace mola
 template <class... Ts>
 struct overloaded : Ts...
 {
-    using Ts::operator()...;
+  using Ts::operator()...;
 };
 
 /** Based on https://en.cppreference.com/w/cpp/utility/variant/visit */

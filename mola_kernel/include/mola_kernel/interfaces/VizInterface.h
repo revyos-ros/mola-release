@@ -1,6 +1,6 @@
 ﻿/* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -22,7 +22,7 @@
 // Was: #include <mrpt/gui/CDisplayWindowGUI.h>  // nanogui
 // clang-format off
 namespace nanogui { class Window; }
-namespace mrpt::opengl { class CSetOfObjects; }
+namespace mrpt::opengl { class CSetOfObjects; class Scene; }
 // clang-format on
 
 namespace mola
@@ -32,54 +32,59 @@ namespace mola
  * \ingroup mola_kernel_interfaces_grp */
 class VizInterface
 {
-   public:
-    VizInterface()          = default;
-    virtual ~VizInterface() = default;
+ public:
+  VizInterface() = default;
 
-    using Ptr = std::shared_ptr<VizInterface>;
+  using Ptr = std::shared_ptr<VizInterface>;
 
-    // ===============================
-    // See class MolaViz for docs
-    // ===============================
+  // ===============================
+  // See class MolaViz for docs
+  // ===============================
 
-    virtual std::future<nanogui::Window*> create_subwindow(
-        const std::string& title, const std::string& parentWindow = "main") = 0;
+  virtual std::future<nanogui::Window*> create_subwindow(
+      const std::string& title, const std::string& parentWindow = "main") = 0;
 
-    virtual std::future<void> subwindow_grid_layout(
-        const std::string& subWindowTitle, const bool orientationVertical,
-        int resolution, const std::string& parentWindow = "main") = 0;
+  virtual std::future<void> subwindow_grid_layout(
+      const std::string& subWindowTitle, const bool orientationVertical, int resolution,
+      const std::string& parentWindow = "main") = 0;
 
-    virtual std::future<void> subwindow_move_resize(
-        const std::string&                subWindowTitle,
-        const mrpt::math::TPoint2D_<int>& location,
-        const mrpt::math::TPoint2D_<int>& size,
-        const std::string&                parentWindow = "main") = 0;
+  virtual std::future<void> subwindow_move_resize(
+      const std::string& subWindowTitle, const mrpt::math::TPoint2D_<int>& location,
+      const mrpt::math::TPoint2D_<int>& size, const std::string& parentWindow = "main") = 0;
 
-    virtual std::future<bool> subwindow_update_visualization(
-        const mrpt::rtti::CObject::Ptr& obj, const std::string& subWindowTitle,
-        const std::string& parentWindow = "main") = 0;
+  virtual std::future<bool> subwindow_update_visualization(
+      const mrpt::rtti::CObject::Ptr& obj, const std::string& subWindowTitle,
+      const std::string& parentWindow = "main") = 0;
 
-    virtual std::future<bool> update_3d_object(
-        const std::string&                                  objName,
-        const std::shared_ptr<mrpt::opengl::CSetOfObjects>& obj,
-        const std::string& viewportName = "main",
-        const std::string& parentWindow = "main") = 0;
+  virtual std::future<bool> update_3d_object(
+      const std::string& objName, const std::shared_ptr<mrpt::opengl::CSetOfObjects>& obj,
+      const std::string& viewportName = "main", const std::string& parentWindow = "main") = 0;
 
-    virtual std::future<bool> update_viewport_look_at(
-        const mrpt::math::TPoint3Df& lookAt,
-        const std::string&           viewportName = "main",
-        const std::string&           parentWindow = "main") = 0;
+  virtual std::future<bool> update_viewport_look_at(
+      const mrpt::math::TPoint3Df& lookAt, const std::string& viewportName = "main",
+      const std::string& parentWindow = "main") = 0;
 
-    virtual std::future<bool> update_viewport_camera_azimuth(
-        const double azimuth, bool absolute_falseForRelative = true,
-        const std::string& viewportName = "main",
-        const std::string& parentWindow = "main") = 0;
+  virtual std::future<bool> update_viewport_camera_azimuth(
+      const double azimuth, bool absolute_falseForRelative = true,
+      const std::string& viewportName = "main", const std::string& parentWindow = "main") = 0;
 
-    virtual std::future<void> enqueue_custom_nanogui_code(
-        const std::function<void(void)>& userCode) = 0;
+  virtual std::future<bool> update_viewport_camera_orthographic(
+      const bool orthographic, const std::string& viewportName = "main",
+      const std::string& parentWindow = "main") = 0;
 
-    virtual std::future<bool> output_console_message(
-        const std::string& msg, const std::string& parentWindow = "main") = 0;
+  /// Executes arbitrary user code on the 3D Scene in the background of the main window space.
+  /// This can be used to modify the viewport, create new sub-viewports, etc.
+  /// \note The user-provided code will be executed in the main GUI thread, so mutexes must be used
+  ///        as needed.
+  virtual std::future<bool> execute_custom_code_on_background_scene(
+      const std::function<void(mrpt::opengl::Scene&)>& userCode,
+      const std::string&                               parentWindow = "main") = 0;
+
+  virtual std::future<void> enqueue_custom_nanogui_code(
+      const std::function<void(void)>& userCode) = 0;
+
+  virtual std::future<bool> output_console_message(
+      const std::string& msg, const std::string& parentWindow = "main") = 0;
 };
 
 }  // namespace mola
