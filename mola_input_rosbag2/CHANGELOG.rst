@@ -3,6 +3,36 @@ Changelog for package mola_input_rosbag2
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+1.9.0 (2025-06-06)
+------------------
+* Fix usage of mola_version_to_hexadecimal()
+* cmake: replace local mrpt_version_to_hex() with new mrpt_common mola_version_to_hexadecimal()
+* Contributors: Jose Luis Blanco-Claraco
+
+1.8.1 (2025-05-28)
+------------------
+
+1.8.0 (2025-05-25)
+------------------
+* remove useless commented out dependency
+* Update copyright year
+* Contributors: Jose Luis Blanco-Claraco
+
+1.7.0 (2025-05-06)
+------------------
+
+1.6.4 (2025-04-23)
+------------------
+* more clang-tidy fixes
+* fix: Correctly handling Livox cloud timestamps ("double"s, but in nanoseconds) in BridgeROS2 and bag2 data sources. They are automatically detected, no need to change any parameter.
+* modernize clang-format
+* Contributors: Jose Luis Blanco-Claraco
+
+1.6.3 (2025-03-15)
+------------------
+* rosbag2 input: update C++ default value to "base_link" (all launch files were already like that, here only the default value changes)
+* Contributors: Jose Luis Blanco-Claraco
+
 1.6.2 (2025-02-22)
 ------------------
 

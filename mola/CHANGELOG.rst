@@ -2,6 +2,34 @@
 Changelog for package mola
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.9.0 (2025-06-06)
+------------------
+* Fix silent cmake warnings on unused variables
+* Depend less on ament and more on pure cmake
+* Contributors: Jose Luis Blanco-Claraco
+
+1.8.1 (2025-05-28)
+------------------
+
+1.8.0 (2025-05-25)
+------------------
+* Update license tag to "BSD-3-Clause"
+* Fix: "mola" metapackage warning if using CMAKE_EXPORT_COMPILE_COMMANDS
+* Contributors: Jose Luis Blanco-Claraco
+
+1.7.0 (2025-05-06)
+------------------
+* Merge pull request `#85 <https://github.com/MOLAorg/mola/issues/85>`_ from MOLAorg/feat/video-input-module
+  Feature: new video input MOLA module
+* Feature: new video input MOLA module. For now, implements "image directory" input.
+* Contributors: Jose Luis Blanco-Claraco
+
+1.6.4 (2025-04-23)
+------------------
+
+1.6.3 (2025-03-15)
+------------------
+
 1.6.2 (2025-02-22)
 ------------------
 
