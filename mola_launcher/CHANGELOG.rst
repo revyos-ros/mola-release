@@ -2,6 +2,34 @@
 Changelog for package mola_launcher
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.9.0 (2025-06-06)
+------------------
+* Depend less on ament and more on pure cmake
+* Contributors: Jose Luis Blanco-Claraco
+
+1.8.1 (2025-05-28)
+------------------
+* Fix: Do not use the deprecated ament_target_dependencies()
+* Contributors: Jose Luis Blanco-Claraco
+
+1.8.0 (2025-05-25)
+------------------
+* Update copyright year
+* Contributors: Jose Luis Blanco-Claraco
+
+1.7.0 (2025-05-06)
+------------------
+* code clean up: remove useless dtors, and mark the required copy ctors as deleted
+* Contributors: Jose Luis Blanco-Claraco
+
+1.6.4 (2025-04-23)
+------------------
+* modernize clang-format
+* Contributors: Jose Luis Blanco-Claraco
+
+1.6.3 (2025-03-15)
+------------------
+
 1.6.2 (2025-02-22)
 ------------------
 
