@@ -2,6 +2,38 @@
 Changelog for package mola_kernel
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.9.0 (2025-06-06)
+------------------
+* MapSourceBase: add a new optional field "metadata"
+* NavStateFilter interface: Now is a RawDataConsumer too
+* Contributors: Jose Luis Blanco-Claraco
+
+1.8.1 (2025-05-28)
+------------------
+
+1.8.0 (2025-05-25)
+------------------
+* Update Viz interface: add methods to run arbitrary Scene manipulation and camera orthographic mode
+* Update copyright year
+* fix reversed logic
+* clang-format fix
+* Add mola::Synchronizer for grouping observations
+* Contributors: Jose Luis Blanco-Claraco
+
+1.7.0 (2025-05-06)
+------------------
+* code clean up: remove useless dtors, and mark the required copy ctors as deleted
+* Contributors: Jose Luis Blanco-Claraco
+
+1.6.4 (2025-04-23)
+------------------
+* fix: Correctly handling Livox cloud timestamps ("double"s, but in nanoseconds) in BridgeROS2 and bag2 data sources. They are automatically detected, no need to change any parameter.
+* modernize clang-format
+* Contributors: Jose Luis Blanco-Claraco
+
+1.6.3 (2025-03-15)
+------------------
+
 1.6.2 (2025-02-22)
 ------------------
 * ExecutableBase inteface: added diagnostics API
