@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -21,9 +21,9 @@ namespace mola
  */
 class EntityRelativeBase : public EntityBase
 {
-   public:
-    /** The ID of the base keyframe (entity) */
-    mola::id_t base_id_{mola::INVALID_ID};
+ public:
+  /** The ID of the base keyframe (entity) */
+  mola::id_t base_id_{mola::INVALID_ID};
 };
 
 }  // namespace mola
