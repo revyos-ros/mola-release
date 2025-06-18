@@ -2,6 +2,34 @@
 Changelog for package mola_metric_maps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.9.0 (2025-06-06)
+------------------
+
+1.8.1 (2025-05-28)
+------------------
+* Fix: Do not use the deprecated ament_target_dependencies()
+* Contributors: Jose Luis Blanco-Claraco
+
+1.8.0 (2025-05-25)
+------------------
+* Update copyright year
+* Contributors: Jose Luis Blanco-Claraco
+
+1.7.0 (2025-05-06)
+------------------
+* fix clang-format
+* Metric maps can now be rendered as semitransparent pointclouds
+* Contributors: Jose Luis Blanco-Claraco
+
+1.6.4 (2025-04-23)
+------------------
+* robin-map: Update to v1.4.0
+* modernize clang-format
+* Contributors: Jose Luis Blanco-Claraco
+
+1.6.3 (2025-03-15)
+------------------
+
 1.6.2 (2025-02-22)
 ------------------
 
