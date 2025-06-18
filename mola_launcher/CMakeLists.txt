@@ -2,7 +2,7 @@
 #        A Modular Optimization framework for Localization and mApping
 #                               (MOLA)
 #
-# Copyright (C) 2018-2024, Jose Luis Blanco-Claraco, contributors (AUTHORS.md)
+# Copyright (C) 2018-2025, Jose Luis Blanco-Claraco, contributors (AUTHORS.md)
 # All rights reserved.
 # Released under GNU GPL v3. See LICENSE file
 # ------------------------------------------------------------------------------
@@ -62,8 +62,6 @@ add_subdirectory(apps)
 #  ROS2
 # -----------------------------------------------------------------------------
 if(DETECTED_ROS2)
-
-
   # Mark executables and/or libraries for installation
   set(CATKIN_PACKAGE_LIB_DESTINATION lib)
   set(CATKIN_PACKAGE_BIN_DESTINATION lib/${PROJECT_NAME})
@@ -79,10 +77,6 @@ if(DETECTED_ROS2)
 
   # find dependencies
   find_package(ament_cmake REQUIRED)
-
-  #ament_target_dependencies(MY_TARGET
-  #  rclcpp...
-  #)
 
   ament_package()
 endif()
