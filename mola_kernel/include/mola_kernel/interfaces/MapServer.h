@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -20,46 +20,39 @@ namespace mola
  * \ingroup mola_kernel_interfaces_grp */
 class MapServer
 {
-   public:
-    MapServer();
-    virtual ~MapServer();
+ public:
+  MapServer() = default;
 
-    /** @name Virtual interface of MapServer
-     *{ */
+  /** @name Virtual interface of MapServer
+   *{ */
 
-    struct ReturnStatus
-    {
-        ReturnStatus() = default;
+  struct ReturnStatus
+  {
+    ReturnStatus() = default;
 
-        bool        success = false;
-        std::string error_message;
-    };
+    bool        success = false;
+    std::string error_message;
+  };
 
-    /** Loads a map from file(s) and sets it as active current map.
-     * Different implementations may use one or more files to store map as
-     * files.
-     *
-     *  \param[in] path File name(s) prefix for the map to load. Do not add file
-     * extension.
-     */
-    virtual ReturnStatus map_load([[maybe_unused]] const std::string& path)
-    {
-        return {};
-    }
+  /** Loads a map from file(s) and sets it as active current map.
+   * Different implementations may use one or more files to store map as
+   * files.
+   *
+   *  \param[in] path File name(s) prefix for the map to load. Do not add file
+   * extension.
+   */
+  virtual ReturnStatus map_load([[maybe_unused]] const std::string& path) { return {}; }
 
-    /** Saves a map from file(s) and sets it as active current map.
-     * Different implementations may use one or more files to store map as
-     * files.
-     *
-     *  \param[in] path File name(s) prefix for the map to save. Do not add file
-     * extension.
-     */
-    virtual ReturnStatus map_save([[maybe_unused]] const std::string& path)
-    {
-        return {};
-    }
+  /** Saves a map from file(s) and sets it as active current map.
+   * Different implementations may use one or more files to store map as
+   * files.
+   *
+   *  \param[in] path File name(s) prefix for the map to save. Do not add file
+   * extension.
+   */
+  virtual ReturnStatus map_save([[maybe_unused]] const std::string& path) { return {}; }
 
-    /** @} */
+  /** @} */
 };
 
 }  // namespace mola

@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -25,12 +25,12 @@ namespace mola
  */
 class RelDynPose3KF : public EntityRelativeBase, public KeyFrameBase
 {
-    DEFINE_SERIALIZABLE(RelDynPose3KF, mola)
+  DEFINE_SERIALIZABLE(RelDynPose3KF, mola)
 
-   public:
-    /** The up-to-date value of this entity. */
-    mrpt::math::TPose3D  relpose_value;
-    mrpt::math::TTwist3D twist_value;
+ public:
+  /** The up-to-date value of this entity. */
+  mrpt::math::TPose3D  relpose_value;
+  mrpt::math::TTwist3D twist_value;
 };
 
 }  // namespace mola
