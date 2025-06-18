@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
  *
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * Licensed under the GNU GPL v3 for non-commercial applications.
  *
  * This file is part of MOLA.
@@ -42,45 +42,38 @@ namespace mola
 template <typename T, size_t SIDE_NUM_BITS, typename inner_coord_t>
 class FixedDenseGrid3D
 {
-   public:
-    constexpr static size_t CELLS_PER_DIM    = 1 << SIDE_NUM_BITS;
-    constexpr static size_t TOTAL_CELL_COUNT = 1 << (3 * SIDE_NUM_BITS);
+ public:
+  constexpr static size_t CELLS_PER_DIM    = 1 << SIDE_NUM_BITS;
+  constexpr static size_t TOTAL_CELL_COUNT = 1 << (3 * SIDE_NUM_BITS);
 
-    // The use of "calloc()" for super fast allocation needs this:
-    static_assert(std::is_trivially_copyable_v<T>);
+  // The use of "calloc()" for super fast allocation needs this:
+  static_assert(std::is_trivially_copyable_v<T>);
 
-    FixedDenseGrid3D()
-    {
-        cells_ = reinterpret_cast<T*>(calloc(sizeof(T), TOTAL_CELL_COUNT));
-    }
-    ~FixedDenseGrid3D() { free(cells_); }
+  FixedDenseGrid3D() { cells_ = reinterpret_cast<T*>(calloc(sizeof(T), TOTAL_CELL_COUNT)); }
+  ~FixedDenseGrid3D() { free(cells_); }
 
-    T& cellByIndex(const index3d_t<inner_coord_t>& idx)
-    {
-        ASSERTDEB_LT_(idx.cx, CELLS_PER_DIM);
-        ASSERTDEB_LT_(idx.cy, CELLS_PER_DIM);
-        ASSERTDEB_LT_(idx.cz, CELLS_PER_DIM);
+  T& cellByIndex(const index3d_t<inner_coord_t>& idx)
+  {
+    ASSERTDEB_LT_(idx.cx, CELLS_PER_DIM);
+    ASSERTDEB_LT_(idx.cy, CELLS_PER_DIM);
+    ASSERTDEB_LT_(idx.cz, CELLS_PER_DIM);
 
-        return cells_
-            [idx.cx + (idx.cy << SIDE_NUM_BITS) +
-             (idx.cz << (2 * SIDE_NUM_BITS))];
-    }
-    const T& cellByIndex(const index3d_t<inner_coord_t>& idx) const
-    {
-        ASSERTDEB_LT_(idx.cx, CELLS_PER_DIM);
-        ASSERTDEB_LT_(idx.cy, CELLS_PER_DIM);
-        ASSERTDEB_LT_(idx.cz, CELLS_PER_DIM);
+    return cells_[idx.cx + (idx.cy << SIDE_NUM_BITS) + (idx.cz << (2 * SIDE_NUM_BITS))];
+  }
+  const T& cellByIndex(const index3d_t<inner_coord_t>& idx) const
+  {
+    ASSERTDEB_LT_(idx.cx, CELLS_PER_DIM);
+    ASSERTDEB_LT_(idx.cy, CELLS_PER_DIM);
+    ASSERTDEB_LT_(idx.cz, CELLS_PER_DIM);
 
-        return cells_
-            [idx.cx + (idx.cy << SIDE_NUM_BITS) +
-             (idx.cz << (2 * SIDE_NUM_BITS))];
-    }
+    return cells_[idx.cx + (idx.cy << SIDE_NUM_BITS) + (idx.cz << (2 * SIDE_NUM_BITS))];
+  }
 
-    const T* cells() const { return cells_; }
-    T*       cells() { return cells_; }
+  const T* cells() const { return cells_; }
+  T*       cells() { return cells_; }
 
-   private:
-    T* cells_;
+ private:
+  T* cells_;
 };
 
 }  // namespace mola
