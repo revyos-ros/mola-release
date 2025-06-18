@@ -84,7 +84,59 @@ the corresponding checkbox in the
 
 3. Re-localization
 --------------------------------------
-Write me!
+There are two ROS services that can be used to enforce the MOLA subsystem to relocalize, for example,
+to address the problem of initial localization:
+
+
+3.1. Specify the new localization and its initial uncertainty
+=================================================================
+
+The service ``/relocalize_near_pose`` (``mola_msgs/srv/RelocalizeNearPose``) can be
+used to directly request a relocalization in a given area (a pose with uncertainty):
+
+   .. code-block:: bash
+
+      ros2 service call /relocalize_near_pose mola_msgs/srv/RelocalizeNearPose "{
+      pose: {
+         header: {
+            stamp: {sec: 0, nanosec: 0},
+            frame_id: 'map'
+         },
+         pose: {
+            pose: {
+            position: {x: 1.0, y: 2.0, z: 0.0},
+            orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}
+            },
+            covariance: [1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                        0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+         }
+      }
+      }"
+
+
+3.2. Request automatic relocalization from GNSS (GPS)
+=================================================================
+
+In geo-referenced maps, it is possible to request MOLA-LO to use incoming GPS readings to
+bootstrap LiDAR-based localization. 
+
+.. note::
+   
+   This method requires the use of the :ref:`smoother state estimator <mola_sta_est_index>`.
+
+Request a relocalization now with:
+
+   .. code-block:: bash
+
+      ros2 service call /relocalize_from_state_estimator  mola_msgs/srv/RelocalizeFromStateEstimator "{}"
+
+
+Depending on the parameters, it may take some time for the re-localization to take effect.
+
 
 |
 
@@ -197,27 +249,36 @@ Write me!
 
 6. Map publishing
 --------------------------------------
-There are two ways of publishing maps to ROS:
+There are three ways of publishing maps to ROS:
 
-* Using ``mrpt_map_server`` (`github <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server/>`_):
-  the recommended way for static, previously-built maps. In this case, one ROS topic
-  will be published for each map layer, as described in the package documentation.
-  See also :ref:`this tutorial <tutorial-pub-map-server-to-ros>`.
+1. Using ``mrpt_map_server`` (`github <https://github.com/mrpt-ros-pkg/mrpt_navigation/tree/ros2/mrpt_map_server/>`_):
+   the recommended way for static, previously-built maps, if you are **not** using MOLA for localization but want the 
+   map published for localization using the :ref:`particle filter method <localization-only>` or for your own purposes,
+   e.g. for visualization in RViz, processing in a custom node, etc.
+   In this case, one ROS topic will be published for each map layer, as described in the package documentation.
+   See also :ref:`this tutorial <tutorial-pub-map-server-to-ros>`.
 
-* During a live map building process (e.g. MOLA-LO).
+2. During a live map building process (e.g. MOLA-LO).
 
-In this latter case, BridgeROS2 will look for modules implementing
-:ref:`MapSourceBase <doxid-classmola_1_1_map_source_base>` and will publish
-one **topic** named ``<METHOD>/<LAYER_NAME>`` for each map layer.
-The metric map layer C++ class will determine the ROS topic type to use.
+.. dropdown:: Topics
 
-.. note::
-
-   Using the default MOLA LiDAR odometry pipeline, only one map topic will
-   be generated during mapping:
+   Using the default MOLA LiDAR odometry pipeline, only one map topic will be generated during live mapping:
 
    * Name: ``/lidar_odometry/localmap_points``
    * Type: ``sensor_msgs/PointCloud2``
+
+
+3. If using MOLA-LO for localization-only, it will send out the loaded map.
+   In this case, there will be as many topics as map layers in the ``*.mm`` file.
+   See also :ref:`this tutorial <tutorial-pub-map-server-to-ros>`.
+
+In cases (2)-(3), ``BridgeROS2`` will look for modules implementing
+:ref:`MapSourceBase <doxid-classmola_1_1_map_source_base>` and will publish
+one **topic** named ``<METHOD>/<LAYER_NAME>`` for each map layer.
+The metric map layer C++ class will determine the ROS topic type to use.
+Map topics are "latched" (so that new subscribers will receive the last
+published map immediately after subscribing), and will be re-published only
+if mapping is enabled and the map has changed since the last publication.
 
 |
 
@@ -314,3 +375,74 @@ Documented parameters:
       # generate_simplemap: false
       ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
          "{parameters: \"mola::LidarOdometry:lidar_odom:\n  generate_simplemap: false\n\"}"
+
+- ``reset_state``: This is actually not a real state variable, but a trigger to request MOLA-LO to
+  reset its state, effectively restarting mapping from scratch. It resets the internal local map, the
+  simplemap (keyframe map). The state estimator, since it is in a different independent module, is not
+  affected.
+
+.. dropdown:: Copy & paste commands to reset map
+
+   .. code-block:: bash
+
+      ros2 service call /mola_runtime_param_set mola_msgs/srv/MolaRuntimeParamSet \
+         "{parameters: \"mola::LidarOdometry:lidar_odom:\n  reset_state: true\n\"}"
+
+----
+
+.. _mola_ros2_initial_localization:
+
+8. Initial localization
+--------------------------------------
+
+8.1. Lidar-Odometry (LO)
+============================================
+When the LO system is started, there are different situations: 
+
+1. The system is started **without any former map**. Here, the default is starting at the identity SE(3) pose,
+   that is, at the origin (0,0,0), and that should be enough in most common cases.
+
+2. The system is started **with a former known map**. Here, correctly localizing within that map before trying to update
+   it is critical to avoid ruining the map. Also, finding the correct initial pose is a non trivial problem and requires
+   specific methods.
+
+For the latter case, it is important to disable mapping at start up (see the ``start_mapping_enabled:=False`` launch 
+argument :ref:`above <ros2_node_lo_docs>`) and only enable mapping once the system is correctly localized, and if
+the user really wants to update the map. Keeping mapping disabled for the whole run is actually desired for robots
+operating in a known, pre-mapped environment.
+
+Then, the user can choose between: 
+
+- Requesting re-localization in a given area or from GNSS readings, as described in
+  :ref:`this section <mola_ros2api_relocalization>` above.
+- Selecting one of the available initial localization methods directly set in the pipeline configuration file,
+  or via a ROS2 launch argument, so that method is used straight away at startup.
+
+These are the available initial localization methods, that can be used in the launch argument 
+``initial_localization_method:=xxxx`` launch argument (listed :ref:`above <ros2_node_lo_docs>`):
+
+.. dropdown:: How to select initial localization without ROS API
+
+   If LO is launched independently of a ROS2 system, e.g. using the 
+   :ref:`command-line <mola_lidar_odometry_cli>` or :ref:`GUI <mola_lo_apps>` LO tools,
+   the initial localization method can be set via the environment variable
+   ``MOLA_LO_INITIAL_LOCALIZATION_METHOD`` which should be set to any of the options
+   listed below. For example, to set the initial localization method to ``FromStateEstimator``:
+
+   .. code-block:: bash
+
+      MOLA_LO_INITIAL_LOCALIZATION_METHOD="InitLocalization::FromStateEstimator" \
+      mola_lidar_odometry_cli ... \ # the rest as usual
+
+
+- ``InitLocalization::FixedPose``: Initializes around a given SE(3) pose with covariance.
+
+- ``InitLocalization::FromStateEstimator``: In combination with the smoother state estimator,
+  can be used to initialize based on accumulated evidence of geo-referenced positioning based on low-cost 
+  GNSS readings, wheels odometry, IMU, or any sensible combination of sensors. See :ref:`smoother state estimator <mola_sta_est_index>`.
+
+- ``InitLocalization::PitchAndRollFromIMU``: Without using the external state estimator, this method
+  uses the IMU to estimate the pitch and roll angles of the robot, and then initializes the localization
+  system with that information **assuming sensor is roughly stationary at startup**.
+  This is useful for systems that are not perfectly level, such as hand-held devices, drones, etc.
+  since it will remove the apparent tilt of the ground plane.
