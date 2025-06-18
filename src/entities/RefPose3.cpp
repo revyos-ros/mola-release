@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -20,21 +20,18 @@ IMPLEMENTS_SERIALIZABLE(RefPose3, EntityBase, mola);
 
 // Implementation of the CSerializable virtual interface:
 uint8_t RefPose3::serializeGetVersion() const { return 0; }
-void    RefPose3::serializeTo(mrpt::serialization::CArchive& out) const
+void    RefPose3::serializeTo(mrpt::serialization::CArchive& out) const { baseSerializeTo(out); }
+void    RefPose3::serializeFrom(mrpt::serialization::CArchive& in, uint8_t version)
 {
-    baseSerializeTo(out);
-}
-void RefPose3::serializeFrom(mrpt::serialization::CArchive& in, uint8_t version)
-{
-    baseSerializeFrom(in);
+  baseSerializeFrom(in);
 
-    switch (version)
+  switch (version)
+  {
+    case 0:
     {
-        case 0:
-        {
-        }
-        break;
-        default:
-            MRPT_THROW_UNKNOWN_SERIALIZATION_VERSION(version);
-    };
+    }
+    break;
+    default:
+      MRPT_THROW_UNKNOWN_SERIALIZATION_VERSION(version);
+  };
 }
