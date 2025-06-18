@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -19,15 +19,15 @@ using namespace mola;
 // To be run at .so/.dll load:
 MRPT_INITIALIZER(do_register_mrpt_kernel)
 {
-    // Register module:
-    MOLA_REGISTER_MODULE(WorldModel);
+  // Register module:
+  MOLA_REGISTER_MODULE(WorldModel);
 
-    // Register serializable classes:
-    mrpt::rtti::registerClass(CLASS_ID(mola::WorldModelData));
+  // Register serializable classes:
+  mrpt::rtti::registerClass(CLASS_ID(mola::WorldModelData));
 
-    mrpt::rtti::registerClass(CLASS_ID(mola::FactorConstVelKinematics));
-    mrpt::rtti::registerClass(CLASS_ID(mola::FactorRelativePose3));
-    mrpt::rtti::registerClass(CLASS_ID(mola::FactorStereoProjectionPose));
-    mrpt::rtti::registerClass(CLASS_ID(mola::SmartFactorIMU));
-    mrpt::rtti::registerClass(CLASS_ID(mola::SmartFactorStereoProjectionPose));
+  mrpt::rtti::registerClass(CLASS_ID(mola::FactorConstVelKinematics));
+  mrpt::rtti::registerClass(CLASS_ID(mola::FactorRelativePose3));
+  mrpt::rtti::registerClass(CLASS_ID(mola::FactorStereoProjectionPose));
+  mrpt::rtti::registerClass(CLASS_ID(mola::SmartFactorIMU));
+  mrpt::rtti::registerClass(CLASS_ID(mola::SmartFactorStereoProjectionPose));
 }
