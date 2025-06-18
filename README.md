@@ -1,3 +1,47 @@
+## mola (jazzy) - 1.9.0-1
+
+The packages in the `mola` repository were released into the `jazzy` distro by running `/home/z572/gits/revyos-ros/venv/bin/bloom-release -r jazzy mola --override-release-repository-push-url git@github.com:revyos-ros/mola-release.git` on `Wed, 18 Jun 2025 07:13:20 -0000`
+
+These packages were released:
+- `kitti_metrics_eval`
+- `mola`
+- `mola_bridge_ros2`
+- `mola_demos`
+- `mola_input_euroc_dataset`
+- `mola_input_kitti360_dataset`
+- `mola_input_kitti_dataset`
+- `mola_input_mulran_dataset`
+- `mola_input_paris_luco_dataset`
+- `mola_input_rawlog`
+- `mola_input_rosbag2`
+- `mola_input_video`
+- `mola_kernel`
+- `mola_launcher`
+- `mola_metric_maps`
+- `mola_msgs`
+- `mola_pose_list`
+- `mola_relocalization`
+- `mola_traj_tools`
+- `mola_viz`
+- `mola_yaml`
+
+Version of package(s) in repository `mola`:
+
+- upstream repository: https://github.com/MOLAorg/mola.git
+- release repository: https://github.com/revyos-ros/mola-release.git
+- rosdistro version: `1.9.0-1`
+- old version: `1.6.2-1`
+- new version: `1.9.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.12.0`
+- catkin_pkg version: `1.0.0`
+- rosdep version: `0.22.2`
+- rosdistro version: `0.9.0`
+- vcstools version: `0.1.42`
+
+
 ## mola (humble) - 1.9.0-1
 
 The packages in the `mola` repository were released into the `humble` distro by running `/home/z572/gits/revyos-ros/venv/bin/bloom-release -r humble mola --override-release-repository-push-url git@github.com:revyos-ros/mola-release.git` on `Mon, 16 Jun 2025 05:26:53 -0000`
