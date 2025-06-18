@@ -1,6 +1,6 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * See LICENSE for license information.
  * ------------------------------------------------------------------------- */
 /**
@@ -32,7 +32,6 @@ template <class T, class Compare = std::less<T>>
 using fast_set = std::set<T, Compare, FastAllocator<T>>;
 
 template <class Key, class T, class Compare = std::less<Key>>
-using fast_map =
-    std::map<Key, T, Compare, FastAllocator<std::pair<const Key, T>>>;
+using fast_map = std::map<Key, T, Compare, FastAllocator<std::pair<const Key, T>>>;
 
 }  // namespace mola
