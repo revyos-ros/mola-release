@@ -2,7 +2,7 @@
 #        A Modular Optimization framework for Localization and mApping
 #                               (MOLA)
 #
-# Copyright (C) 2018-2024, Jose Luis Blanco-Claraco, contributors (AUTHORS.md)
+# Copyright (C) 2018-2025, Jose Luis Blanco-Claraco, contributors (AUTHORS.md)
 # All rights reserved.
 # Released under GNU GPL v3. See LICENSE file
 # ------------------------------------------------------------------------------
@@ -37,14 +37,12 @@ set(LIB_SRCS
   src/factors/SmartFactorIMU.cpp
   src/factors/SmartFactorStereoProjectionPose.cpp
   src/interfaces/BackEndBase.cpp
-  src/interfaces/Dataset_UI.cpp
   src/interfaces/ExecutableBase.cpp
   src/interfaces/FilterBase.cpp
   src/interfaces/FrontEndBase.cpp
-  src/interfaces/MapServer.cpp
   src/interfaces/NavStateFilter.cpp
   src/interfaces/RawDataSourceBase.cpp
-  src/interfaces/Relocalization.cpp
+  src/utils/Synchronizer.cpp
   src/LazyLoadResource.cpp
   src/MinimalModuleContainer.cpp
   src/pretty_print_exception.cpp
@@ -88,6 +86,7 @@ set(LIB_PUBLIC_HDRS
   include/mola_kernel/interfaces/RawDataSourceBase.h
   include/mola_kernel/interfaces/Relocalization.h
   include/mola_kernel/interfaces/VizInterface.h
+  include/mola_kernel/utils/Synchronizer.h
   include/mola_kernel/LazyLoadResource.h
   include/mola_kernel/MinimalModuleContainer.h
   include/mola_kernel/pretty_print_exception.h
