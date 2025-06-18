@@ -1,7 +1,7 @@
 /* -------------------------------------------------------------------------
  *   A Modular Optimization framework for Localization and mApping  (MOLA)
  *
- * Copyright (C) 2018-2024 Jose Luis Blanco, University of Almeria
+ * Copyright (C) 2018-2025 Jose Luis Blanco, University of Almeria
  * Licensed under the GNU GPL v3 for non-commercial applications.
  *
  * This file is part of MOLA.
@@ -41,12 +41,12 @@ using namespace mola;
 
 MRPT_INITIALIZER(do_register_mola_metric_maps)
 {
-    using mrpt::rtti::registerClass;
+  using mrpt::rtti::registerClass;
 
-    // and register RTTI info:
-    registerClass(CLASS_ID(mola::OccGrid));
-    registerClass(CLASS_ID(mola::SparseVoxelPointCloud));
-    registerClass(CLASS_ID(mola::SparseTreesPointCloud));
-    registerClass(CLASS_ID(mola::HashedVoxelPointCloud));
-    registerClass(CLASS_ID(mola::NDT));
+  // and register RTTI info:
+  registerClass(CLASS_ID(mola::OccGrid));
+  registerClass(CLASS_ID(mola::SparseVoxelPointCloud));
+  registerClass(CLASS_ID(mola::SparseTreesPointCloud));
+  registerClass(CLASS_ID(mola::HashedVoxelPointCloud));
+  registerClass(CLASS_ID(mola::NDT));
 }
